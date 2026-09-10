@@ -1,0 +1,51 @@
+PERFILADO DE LA IMPLEMENTACION INICIAL
+         339120 function calls in 0.809 seconds
+
+   Ordered by: cumulative time
+   List reduced from 22 to 15 due to restriction <15>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.345    0.345    0.810    0.810 /Users/alesso/dev/university/PE/parcial_1/detectores.py:74(detectar_inicial)
+        1    0.411    0.411    0.411    0.411 /Users/alesso/dev/university/PE/parcial_1/algoritmos_ordenamiento.py:4(ordenar_burbuja)
+     5000    0.006    0.000    0.050    0.000 /Users/alesso/dev/university/PE/parcial_1/detectores.py:32(_calcular_perfil)
+    10000    0.004    0.000    0.042    0.000 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/statistics.py:181(fmean)
+    10000    0.018    0.000    0.036    0.000 {built-in method math.fsum}
+   259066    0.018    0.000    0.018    0.000 /Users/alesso/dev/university/PE/parcial_1/detectores.py:35(<genexpr>)
+     5000    0.001    0.000    0.003    0.000 {built-in method builtins.sum}
+     5003    0.002    0.000    0.002    0.000 /Users/alesso/dev/university/PE/parcial_1/detectores.py:116(<genexpr>)
+    20007    0.002    0.000    0.002    0.000 {built-in method builtins.len}
+     5009    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
+     5000    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}
+     5000    0.000    0.000    0.000    0.000 {built-in method builtins.max}
+     5000    0.000    0.000    0.000    0.000 {built-in method builtins.next}
+     5000    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+
+PERFILADO DEL ALGORITMO OPTIMIZADO
+         76059 function calls (69457 primitive calls) in 0.013 seconds
+
+   Ordered by: cumulative time
+   List reduced from 32 to 15 due to restriction <15>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.013    0.013 /Users/alesso/dev/university/PE/parcial_1/perfilado.py:41(optimizada)
+        1    0.000    0.000    0.013    0.013 /Users/alesso/dev/university/PE/parcial_1/detectores.py:252(detectar_optimizado)
+      101    0.005    0.000    0.010    0.000 /Users/alesso/dev/university/PE/parcial_1/detectores.py:152(_detectar_grupo)
+ 6703/101    0.003    0.000    0.004    0.000 /Users/alesso/dev/university/PE/parcial_1/algoritmos_ordenamiento.py:19(ordenar_quicksort)
+     5000    0.000    0.000    0.001    0.000 /Users/alesso/dev/university/PE/parcial_1/detectores.py:54(obtener)
+      101    0.000    0.000    0.001    0.000 /Users/alesso/dev/university/PE/parcial_1/detectores.py:61(_calcular)
+      101    0.000    0.000    0.001    0.000 /Users/alesso/dev/university/PE/parcial_1/detectores.py:32(_calcular_perfil)
+      202    0.000    0.000    0.001    0.000 /opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/statistics.py:181(fmean)
+      202    0.000    0.000    0.001    0.000 {built-in method math.fsum}
+    20212    0.001    0.000    0.001    0.000 {built-in method builtins.len}
+    15000    0.001    0.000    0.001    0.000 {method 'append' of 'collections.deque' objects}
+    14465    0.001    0.000    0.001    0.000 {method 'popleft' of 'collections.deque' objects}
+        1    0.000    0.000    0.001    0.001 /Users/alesso/dev/university/PE/parcial_1/detectores.py:23(_agrupar_por_usuario)
+     5101    0.000    0.000    0.000    0.000 /Users/alesso/dev/university/PE/parcial_1/detectores.py:35(<genexpr>)
+     5009    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
+
+
+
+Cache de perfiles: 4899 aciertos y 101 fallos
