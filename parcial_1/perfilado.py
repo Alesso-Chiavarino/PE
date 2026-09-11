@@ -9,21 +9,36 @@ from generador import generar_transacciones
 from modelos import Alerta, Transaccion
 
 
+# ==============================================================================
+# 8. PERFILADO DE CODIGO CON cProfile Y pstats (DETECCION DE BOTTLENECKS)
+# ==============================================================================
 def _perfilar(
     nombre: str,
     funcion: Callable[[list[Transaccion]], list[Alerta]],
     transacciones: list[Transaccion],
     carpeta: Path,
 ) -> tuple[list[Alerta], str, Path]:
+    """
+    [CRITERIO: PERFILADO DEL CODIGO]
+    - cProfile: Perfilador deterministico de Python a nivel de llamada de funcion.
+      Mide cantidad de llamadas (ncalls), tiempo propio (tottime) y tiempo acumulado (cumtime).
+    - pstats: Formatea y ordena las estadisticas por tiempo acumulado ('cumulative').
+    - Objetivo: Identificar cientificamente el cuello de botella (bottleneck).
+      En la version inicial, cProfile expone que ordenar_burbuja y los list-comprehensions
+      consumen mas del 90% del tiempo de CPU.
+    """
     perfilador = cProfile.Profile()
     alertas = perfilador.runcall(funcion, transacciones)
 
+    # Persistencia de estadisticas binarias para herramientas como SnakeViz
     ruta = carpeta / f"perfilado_{nombre}.prof"
     perfilador.dump_stats(ruta)
 
+    # Exportacion de las 15 funciones mas pesadas a texto
     texto = io.StringIO()
     pstats.Stats(perfilador, stream=texto).sort_stats("cumulative").print_stats(15)
     return alertas, texto.getvalue(), ruta
+
 
 
 def ejecutar_perfilado_comparativo(

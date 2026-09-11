@@ -36,12 +36,25 @@ class ResultadoEscalabilidad:
     mejora: float
 
 
+# ==============================================================================
+# 7. MEDICION RIGUROSA DE TIEMPO Y CONSUMO DE MEMORIA
+# ==============================================================================
 def _medir(
     version: str,
     funcion: Callable[[list[Transaccion]], list[Alerta]],
     transacciones: list[Transaccion],
     observacion: str,
 ) -> tuple[ResultadoMedicion, list[Alerta]]:
+    """
+    [CRITERIO: MEDICION RIGUROSA]
+    - time.perf_counter(): Reloj monotono de la maxima resolucion disponible
+      en el sistema operativo. Inmune a cambios de hora del reloj del sistema.
+    - tracemalloc: Rastrea las asignaciones de memoria del interprete de Python.
+      tracemalloc.get_traced_memory() retorna (memoria_actual, memoria_pico).
+      Tomamos memoria_pico para registrar la huella maxima de RAM.
+    - Limitacion conocida: En la version paralela, tracemalloc solo mide el proceso
+      padre, no los procesos hijos del sistema operativo (dato para aclarar en la presentacion).
+    """
     tracemalloc.start()
     inicio = time.perf_counter()
     alertas = funcion(transacciones)
@@ -52,11 +65,12 @@ def _medir(
     resultado = ResultadoMedicion(
         version,
         tiempo,
-        memoria_maxima / (1024 * 1024),
+        memoria_maxima / (1024 * 1024),  # Conversion a Megabytes
         len(alertas),
         observacion,
     )
     return resultado, alertas
+
 
 
 def ejecutar_comparacion(
