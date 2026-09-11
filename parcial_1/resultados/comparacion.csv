@@ -1,6 +1,6 @@
 Version,Tiempo (s),Memoria (MB),Alertas,Observacion
-Implementacion inicial,0.943354,0.082,9,Baseline: Burbuja y busquedas repetidas
-Estructura optimizada,0.051671,0.058,9,"Mejora de busqueda con dict, deque y set"
-Algoritmo optimizado,0.010197,0.078,9,Quicksort y cache: mejor escalabilidad
-Concurrencia/paralelismo,0.109261,1.072,9,2 procesos; se evalua el overhead
-Version final,0.010351,0.076,9,Optimizada secuencial: menor tiempo medido
+Implementacion inicial,0.977220,0.082,9,Baseline: Burbuja y busquedas repetidas
+Estructura optimizada,0.056121,0.058,9,"Mejora de busqueda con dict, deque y set"
+Algoritmo optimizado,0.010674,0.078,9,Quicksort y cache: mejor escalabilidad
+Concurrencia/paralelismo,0.130692,1.072,9,2 procesos; se evalua el overhead
+Version final,0.010230,0.076,9,Optimizada secuencial: menor tiempo medido

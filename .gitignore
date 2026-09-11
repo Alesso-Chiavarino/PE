@@ -1,3 +1,7 @@
 .venv
 venv
-__pycache__
+__pycache__/
+*.py[cod]
+**/resultados/.cache_grafico/
+**/resultados/*.prof
+**/.pptx_build/

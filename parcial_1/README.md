@@ -101,3 +101,10 @@ aumentar el volumen.
 
 La explicacion completa de cada requisito se encuentra en
 `INFORME_TECNICO.md`.
+
+## Presentacion
+
+El PowerPoint para la exposicion se encuentra en
+`presentacion/Parcial-1-Programacion-Eficiente.pptx`. Contiene las diez
+secciones solicitadas, una diapositiva adicional de escalabilidad y notas del
+orador para una presentacion de aproximadamente 10 a 12 minutos.
