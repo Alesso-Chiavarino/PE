@@ -40,7 +40,6 @@ def _perfilar(
     return alertas, texto.getvalue(), ruta
 
 
-
 def ejecutar_perfilado_comparativo(
     cantidad: int, semilla: int, carpeta: Path
 ) -> None:

@@ -51,5 +51,3 @@ def ordenar_quicksort(transacciones: list[Transaccion]) -> list[Transaccion]:
 
     # Recursion sobre subconjuntos particionados
     return ordenar_quicksort(menores) + iguales + ordenar_quicksort(mayores)
-
-

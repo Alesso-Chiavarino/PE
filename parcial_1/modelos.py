@@ -24,4 +24,3 @@ class PerfilUsuario:
     promedio: float
     desviacion: float
     limite_monto_alto: float
-

@@ -1,4 +1,4 @@
-# Primer parcial - Programacion Eficiente
+# Segundo parcial - Programacion Eficiente
 
 Sistema en Python que simula transacciones y detecta cuatro comportamientos
 sospechosos:
@@ -7,6 +7,10 @@ sospechosos:
 - muchas operaciones en poco tiempo;
 - operaciones iguales repetidas;
 - actividad casi simultanea desde ubicaciones diferentes.
+
+La segunda version conserva las comparaciones del primer parcial y agrega
+refactorizacion, procesamiento de archivos CSV grandes, pytest, analisis de
+calidad y documentacion automatica.
 
 ## Como ejecutarlo
 
@@ -21,8 +25,35 @@ python main.py interfaz
 python main.py benchmark --transacciones 5000 --trabajadores 2
 python main.py perfilado --transacciones 5000
 python main.py escalabilidad --volumenes 1000 2500 5000
-python -m unittest discover -v
+python main.py generar-archivo --transacciones 100000 --salida datos/transacciones.csv
+python main.py analizar-archivo datos/transacciones.csv --lote 10000
+pytest
 ```
+
+La cantidad se puede cambiar en los comandos `demo`, `benchmark`, `perfilado`
+y `generar-archivo` mediante `--transacciones`.
+
+## Herramientas del segundo parcial
+
+Se eligieron herramientas presentes en el material de clase y simples de
+ejecutar:
+
+```bash
+python -m pip install -r requirements-dev.txt
+pytest --cov=archivos --cov=configuracion --cov=detectores \
+  --cov=generador --cov=algoritmos_ordenamiento --cov-report=term-missing
+flake8 .
+python main.py perfilado --transacciones 5000
+snakeviz resultados/perfilado_optimizado.prof
+sphinx-build -b html docs docs/_build/html
+```
+
+`pytest` es el framework utilizado por las pruebas. SnakeViz aprovecha los
+archivos `.prof` que el proyecto ya producia con `cProfile`, por lo que no exige
+instrumentar nuevamente el programa. `psutil` registra memoria RSS, tiempo de
+CPU y E/S cuando se procesa un archivo grande.
+
+El detalle de las modificaciones se encuentra en `CAMBIOS_PARCIAL_2.md`.
 
 La interfaz abre una ventana nativa con Tkinter para mostrar las alertas y la
 comparacion de rendimiento. Todo su codigo esta separado en `interfaz/` y no

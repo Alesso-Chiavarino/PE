@@ -4,7 +4,7 @@ import csv
 import os
 import time
 import tracemalloc
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -70,7 +70,6 @@ def _medir(
         observacion,
     )
     return resultado, alertas
-
 
 
 def ejecutar_comparacion(
@@ -155,42 +154,67 @@ def ejecutar_escalabilidad(
 
 
 def guardar_csv(resultados: list[ResultadoMedicion], ruta: Path) -> None:
-    ruta.parent.mkdir(parents=True, exist_ok=True)
-    with ruta.open("w", newline="", encoding="utf-8") as archivo:
-        escritor = csv.writer(archivo)
-        escritor.writerow(
-            ["Version", "Tiempo (s)", "Memoria (MB)", "Alertas", "Observacion"]
-        )
-        for resultado in resultados:
-            escritor.writerow(
-                [
-                    resultado.version,
-                    f"{resultado.tiempo_segundos:.6f}",
-                    f"{resultado.memoria_mb:.3f}",
-                    resultado.cantidad_alertas,
-                    resultado.observacion,
-                ]
+    _guardar_filas_csv(
+        ruta,
+        ("Version", "Tiempo (s)", "Memoria (MB)", "Alertas", "Observacion"),
+        (
+            (
+                resultado.version,
+                f"{resultado.tiempo_segundos:.6f}",
+                f"{resultado.memoria_mb:.3f}",
+                resultado.cantidad_alertas,
+                resultado.observacion,
             )
+            for resultado in resultados
+        ),
+    )
 
 
 def guardar_escalabilidad_csv(
     resultados: list[ResultadoEscalabilidad], ruta: Path
 ) -> None:
+    _guardar_filas_csv(
+        ruta,
+        ("Transacciones", "Inicial (s)", "Optimizada (s)", "Mejora (veces)"),
+        (
+            (
+                resultado.transacciones,
+                f"{resultado.tiempo_inicial:.6f}",
+                f"{resultado.tiempo_optimizado:.6f}",
+                f"{resultado.mejora:.2f}",
+            )
+            for resultado in resultados
+        ),
+    )
+
+
+def _guardar_filas_csv(
+    ruta: Path,
+    encabezado: tuple[str, ...],
+    filas: Iterable[Iterable[object]],
+) -> None:
+    """Centraliza la creacion de archivos CSV de resultados."""
     ruta.parent.mkdir(parents=True, exist_ok=True)
     with ruta.open("w", newline="", encoding="utf-8") as archivo:
         escritor = csv.writer(archivo)
-        escritor.writerow(
-            ["Transacciones", "Inicial (s)", "Optimizada (s)", "Mejora (veces)"]
-        )
-        for resultado in resultados:
-            escritor.writerow(
-                [
-                    resultado.transacciones,
-                    f"{resultado.tiempo_inicial:.6f}",
-                    f"{resultado.tiempo_optimizado:.6f}",
-                    f"{resultado.mejora:.2f}",
-                ]
-            )
+        escritor.writerow(encabezado)
+        escritor.writerows(filas)
+
+
+def _cargar_pyplot(ruta: Path):
+    """Configura Matplotlib una vez y devuelve pyplot si esta instalado."""
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    cache_grafico = ruta.parent / ".cache_grafico"
+    cache_grafico.mkdir(exist_ok=True)
+    os.environ.setdefault("MPLCONFIGDIR", str(cache_grafico))
+    os.environ.setdefault("XDG_CACHE_HOME", str(cache_grafico))
+    os.environ.setdefault("MPLBACKEND", "Agg")
+
+    try:
+        import matplotlib.pyplot as plt
+    except ModuleNotFoundError:
+        return None
+    return plt
 
 
 def mostrar_tabla(resultados: list[ResultadoMedicion]) -> None:
@@ -223,23 +247,19 @@ def mostrar_escalabilidad(resultados: list[ResultadoEscalabilidad]) -> None:
 
 
 def guardar_grafico(resultados: list[ResultadoMedicion], ruta: Path) -> bool:
-    ruta.parent.mkdir(parents=True, exist_ok=True)
-    cache_grafico = ruta.parent / ".cache_grafico"
-    cache_grafico.mkdir(exist_ok=True)
-    os.environ.setdefault("MPLCONFIGDIR", str(cache_grafico))
-    os.environ.setdefault("XDG_CACHE_HOME", str(cache_grafico))
-    os.environ.setdefault("MPLBACKEND", "Agg")
-
-    try:
-        import matplotlib.pyplot as plt
-    except ModuleNotFoundError:
+    plt = _cargar_pyplot(ruta)
+    if plt is None:
         return False
 
     nombres = [resultado.version for resultado in resultados]
     tiempos = [resultado.tiempo_segundos for resultado in resultados]
 
     figura, eje = plt.subplots(figsize=(9, 5))
-    barras = eje.bar(nombres, tiempos, color=["#d95f02", "#7570b3", "#1b9e77", "#e6ab02", "#2a6f97"])
+    barras = eje.bar(
+        nombres,
+        tiempos,
+        color=["#d95f02", "#7570b3", "#1b9e77", "#e6ab02", "#2a6f97"],
+    )
     eje.set_title("Tiempo por version")
     eje.set_ylabel("Segundos")
     eje.tick_params(axis="x", rotation=15)
@@ -253,16 +273,8 @@ def guardar_grafico(resultados: list[ResultadoMedicion], ruta: Path) -> bool:
 def guardar_grafico_escalabilidad(
     resultados: list[ResultadoEscalabilidad], ruta: Path
 ) -> bool:
-    ruta.parent.mkdir(parents=True, exist_ok=True)
-    cache_grafico = ruta.parent / ".cache_grafico"
-    cache_grafico.mkdir(exist_ok=True)
-    os.environ.setdefault("MPLCONFIGDIR", str(cache_grafico))
-    os.environ.setdefault("XDG_CACHE_HOME", str(cache_grafico))
-    os.environ.setdefault("MPLBACKEND", "Agg")
-
-    try:
-        import matplotlib.pyplot as plt
-    except ModuleNotFoundError:
+    plt = _cargar_pyplot(ruta)
+    if plt is None:
         return False
 
     cantidades = [resultado.transacciones for resultado in resultados]

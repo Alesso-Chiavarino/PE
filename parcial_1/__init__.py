@@ -1,2 +1,1 @@
-"""Detector de transacciones sospechosas del primer parcial."""
-
+"""Detector de transacciones sospechosas de Programacion Eficiente."""

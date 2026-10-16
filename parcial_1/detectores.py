@@ -9,15 +9,16 @@ from functools import lru_cache
 from statistics import fmean
 
 from algoritmos_ordenamiento import ordenar_burbuja, ordenar_quicksort
+from configuracion import CONFIGURACION_PREDETERMINADA, ConfiguracionDeteccion
 from modelos import Alerta, PerfilUsuario, Transaccion
 
 
-VENTANA_RAFAGA = 60
-MINIMO_RAFAGA = 5
-VENTANA_REPETICION = 300
-MINIMO_REPETICIONES = 3
-VENTANA_UBICACIONES = 120
-LIMITE_MONTO_FIJO = 1200.0
+VENTANA_RAFAGA = CONFIGURACION_PREDETERMINADA.ventana_rafaga
+MINIMO_RAFAGA = CONFIGURACION_PREDETERMINADA.minimo_rafaga
+VENTANA_REPETICION = CONFIGURACION_PREDETERMINADA.ventana_repeticion
+MINIMO_REPETICIONES = CONFIGURACION_PREDETERMINADA.minimo_repeticiones
+VENTANA_UBICACIONES = CONFIGURACION_PREDETERMINADA.ventana_ubicaciones
+LIMITE_MONTO_FIJO = CONFIGURACION_PREDETERMINADA.limite_monto_fijo
 
 
 def _agrupar_por_usuario(
@@ -42,18 +43,10 @@ def _calcular_perfil(transacciones: list[Transaccion]) -> PerfilUsuario:
 # 2. MEMOIZACION Y CACHING INTELIGENTE
 # ==============================================================================
 class CachePerfiles:
-    """
-    [CRITERIO: MEMOIZACION Y CACHE LRU]
-    - Problema: Calcular el perfil de un usuario (media, varianza y desviacion)
-      requiere recorrer todas sus transacciones. Si un usuario tiene 50 transacciones,
-      hacerlo en cada una repetiria 50 veces el mismo calculo estadistico.
-    - Memoizacion: Se guarda el PerfilUsuario precalculado para no recalcularlo.
-    - Caching Inteligente con LRU: Se usa functools.lru_cache con un limite
-      maximo (1024 usuarios). Si la cantidad de usuarios supera el limite,
-      desaloja los menos utilizados recientemente (evita consumo infinito de RAM).
-    - Invalidacion de Cache: Al ingresar un nuevo lote de transacciones (cargar()),
-      se incrementa la version y se invoca cache_clear() para evitar servir
-      datos viejos (stale data).
+    """Memoriza perfiles con una cache LRU de capacidad limitada.
+
+    Cada carga incrementa la version y limpia la cache. De esta manera, un perfil
+    nunca se reutiliza despues de cambiar el conjunto de transacciones.
     """
 
     def __init__(self, capacidad: int = 1024) -> None:
@@ -82,13 +75,103 @@ class CachePerfiles:
         return _calcular_perfil(self._grupos[usuario])
 
 
-
 def _crear_alerta(transaccion: Transaccion, tipo: str, detalle: str) -> Alerta:
     return Alerta(transaccion.id, transaccion.usuario, tipo, detalle)
 
 
 def _ordenar_alertas(alertas: list[Alerta]) -> list[Alerta]:
     return sorted(alertas, key=lambda alerta: (alerta.transaccion_id, alerta.tipo))
+
+
+class EstadoDeteccionUsuario:
+    """Mantiene las ventanas temporales de un usuario entre transacciones."""
+
+    def __init__(
+        self,
+        perfil: PerfilUsuario,
+        configuracion: ConfiguracionDeteccion = CONFIGURACION_PREDETERMINADA,
+    ) -> None:
+        self.perfil = perfil
+        self.configuracion = configuracion
+        self.ventana_rafaga: deque[Transaccion] = deque()
+        self.ventana_repeticion: deque[Transaccion] = deque()
+        self.ventana_ubicaciones: deque[Transaccion] = deque()
+        self.cantidad_firmas: dict[tuple[float, str], int] = defaultdict(int)
+        self.cantidad_ubicaciones: dict[str, int] = defaultdict(int)
+        self.emitidas: set[tuple[int, str]] = set()
+
+    def procesar(self, transaccion: Transaccion) -> list[Alerta]:
+        """Procesa una transaccion cronologica y devuelve sus nuevas alertas."""
+        alertas: list[Alerta] = []
+        configuracion = self.configuracion
+
+        def agregar(tipo: str, detalle: str) -> None:
+            clave = (transaccion.id, tipo)
+            if clave not in self.emitidas:
+                self.emitidas.add(clave)
+                alertas.append(_crear_alerta(transaccion, tipo, detalle))
+
+        if transaccion.monto > self.perfil.limite_monto_alto:
+            agregar(
+                "MONTO_ALTO",
+                f"Monto ${transaccion.monto:.2f}, "
+                f"limite ${self.perfil.limite_monto_alto:.2f}",
+            )
+
+        while (
+            self.ventana_rafaga
+            and transaccion.instante - self.ventana_rafaga[0].instante
+            > configuracion.ventana_rafaga
+        ):
+            self.ventana_rafaga.popleft()
+        self.ventana_rafaga.append(transaccion)
+        if len(self.ventana_rafaga) >= configuracion.minimo_rafaga:
+            agregar(
+                "RAFAGA",
+                f"{len(self.ventana_rafaga)} operaciones en "
+                f"{configuracion.ventana_rafaga} segundos",
+            )
+
+        while (
+            self.ventana_repeticion
+            and transaccion.instante - self.ventana_repeticion[0].instante
+            > configuracion.ventana_repeticion
+        ):
+            anterior = self.ventana_repeticion.popleft()
+            firma_anterior = (anterior.monto, anterior.comercio)
+            self.cantidad_firmas[firma_anterior] -= 1
+            if self.cantidad_firmas[firma_anterior] == 0:
+                del self.cantidad_firmas[firma_anterior]
+
+        firma = (transaccion.monto, transaccion.comercio)
+        self.ventana_repeticion.append(transaccion)
+        self.cantidad_firmas[firma] += 1
+        if self.cantidad_firmas[firma] >= configuracion.minimo_repeticiones:
+            agregar(
+                "OPERACION_REPETIDA",
+                f"{self.cantidad_firmas[firma]} operaciones iguales en 5 minutos",
+            )
+
+        while (
+            self.ventana_ubicaciones
+            and transaccion.instante - self.ventana_ubicaciones[0].instante
+            > configuracion.ventana_ubicaciones
+        ):
+            anterior = self.ventana_ubicaciones.popleft()
+            self.cantidad_ubicaciones[anterior.ubicacion] -= 1
+            if self.cantidad_ubicaciones[anterior.ubicacion] == 0:
+                del self.cantidad_ubicaciones[anterior.ubicacion]
+
+        self.ventana_ubicaciones.append(transaccion)
+        self.cantidad_ubicaciones[transaccion.ubicacion] += 1
+        if len(self.cantidad_ubicaciones) >= 2:
+            agregar(
+                "UBICACIONES_SIMULTANEAS",
+                "Actividad cercana desde "
+                + ", ".join(sorted(self.cantidad_ubicaciones)),
+            )
+
+        return alertas
 
 
 # ==============================================================================
@@ -125,8 +208,6 @@ def detectar_inicial(transacciones: list[Transaccion]) -> list[Alerta]:
         ]
         # Recalculo redundante del perfil en cada iteracion (sin memoizacion)
         perfil = _calcular_perfil(todas_del_usuario)
-
-
         if transaccion.monto > perfil.limite_monto_alto:
             alertas.append(
                 _crear_alerta(
@@ -210,88 +291,10 @@ def _detectar_grupo(
       (siendo m las transacciones del usuario), tras el ordenamiento O(m log m).
     """
     grupo = ordenar(transacciones)
-
-    # Ventanas deslizantes FIFO con deque: desalojo O(1)
-    ventana_rafaga: deque[Transaccion] = deque()
-    ventana_repeticion: deque[Transaccion] = deque()
-    ventana_ubicaciones: deque[Transaccion] = deque()
-
-    # Tablas hash con acceso O(1) para frecuencias
-    cantidad_firmas: dict[tuple[float, str], int] = defaultdict(int)
-    cantidad_ubicaciones: dict[str, int] = defaultdict(int)
-
+    estado = EstadoDeteccionUsuario(perfil)
     alertas: list[Alerta] = []
-    # Conjunto set O(1) para deduplicacion de alertas
-    emitidas: set[tuple[int, str]] = set()
-
-    def agregar(transaccion: Transaccion, tipo: str, detalle: str) -> None:
-        clave = (transaccion.id, tipo)
-        if clave not in emitidas:
-            emitidas.add(clave)
-            alertas.append(_crear_alerta(transaccion, tipo, detalle))
-
-
     for transaccion in grupo:
-        if transaccion.monto > perfil.limite_monto_alto:
-            agregar(
-                transaccion,
-                "MONTO_ALTO",
-                f"Monto ${transaccion.monto:.2f}, limite ${perfil.limite_monto_alto:.2f}",
-            )
-
-        while (
-            ventana_rafaga
-            and transaccion.instante - ventana_rafaga[0].instante > VENTANA_RAFAGA
-        ):
-            ventana_rafaga.popleft()
-        ventana_rafaga.append(transaccion)
-        if len(ventana_rafaga) >= MINIMO_RAFAGA:
-            agregar(
-                transaccion,
-                "RAFAGA",
-                f"{len(ventana_rafaga)} operaciones en {VENTANA_RAFAGA} segundos",
-            )
-
-        while (
-            ventana_repeticion
-            and transaccion.instante - ventana_repeticion[0].instante
-            > VENTANA_REPETICION
-        ):
-            anterior = ventana_repeticion.popleft()
-            firma_anterior = (anterior.monto, anterior.comercio)
-            cantidad_firmas[firma_anterior] -= 1
-            if cantidad_firmas[firma_anterior] == 0:
-                del cantidad_firmas[firma_anterior]
-
-        firma = (transaccion.monto, transaccion.comercio)
-        ventana_repeticion.append(transaccion)
-        cantidad_firmas[firma] += 1
-        if cantidad_firmas[firma] >= MINIMO_REPETICIONES:
-            agregar(
-                transaccion,
-                "OPERACION_REPETIDA",
-                f"{cantidad_firmas[firma]} operaciones iguales en 5 minutos",
-            )
-
-        while (
-            ventana_ubicaciones
-            and transaccion.instante - ventana_ubicaciones[0].instante
-            > VENTANA_UBICACIONES
-        ):
-            anterior = ventana_ubicaciones.popleft()
-            cantidad_ubicaciones[anterior.ubicacion] -= 1
-            if cantidad_ubicaciones[anterior.ubicacion] == 0:
-                del cantidad_ubicaciones[anterior.ubicacion]
-
-        ventana_ubicaciones.append(transaccion)
-        cantidad_ubicaciones[transaccion.ubicacion] += 1
-        if len(cantidad_ubicaciones) >= 2:
-            agregar(
-                transaccion,
-                "UBICACIONES_SIMULTANEAS",
-                "Actividad cercana desde "
-                + ", ".join(sorted(cantidad_ubicaciones)),
-            )
+        alertas.extend(estado.procesar(transaccion))
 
     return alertas
 
@@ -342,22 +345,11 @@ def _procesar_lote(
 def detectar_paralelo(
     transacciones: list[Transaccion], trabajadores: int | None = None
 ) -> list[Alerta]:
-    """
-    [CRITERIO: CONCURRENCIA Y PARALELISMO]
-    - Por que Procesos (ProcessPoolExecutor) y NO Hilos (threading)?
-      La tarea es intensiva en CPU (CPU-Bound: ordenar, iterar, calcular).
-      En Python, el GIL (Global Interpreter Lock) impide que multiples hilos
-      ejecuten bytecode de Python en paralelo en distintos cores.
-      ProcessPoolExecutor crea procesos independientes con su propio interprete
-      y espacio de memoria, aprovechando verdaderamente multiples nucleos.
-    - Descomposicion del problema sin Locks ni Race Conditions:
-      Como el comportamiento de un usuario es independiente de otro, se particionan
-      los usuarios en lotes (chunks). No se requiere memoria compartida ni candados (mutex/locks).
-    - Trade-off / Overhead de Paralelizacion:
-      La creacion de procesos, serializacion (pickle) de transacciones por IPC
-      (Inter-Process Communication) y recoleccion de resultados agrega un costo fijo.
-      Si el volumen de trabajo secuencial ya es extremadamente rapido (~12 ms),
-      el overhead supera la ganancia (ley de Amdahl).
+    """Procesa grupos de usuarios independientes en procesos separados.
+
+    Los procesos evitan la limitacion del GIL para trabajo de CPU. La creacion y
+    comunicacion de procesos agrega overhead, por lo que esta variante debe
+    compararse con la version secuencial antes de seleccionarla.
     """
     grupos = list(_agrupar_por_usuario(transacciones).items())
     cantidad_trabajadores = trabajadores or min(4, os.cpu_count() or 1)
@@ -397,4 +389,3 @@ def detectar_final(
     """
     del trabajadores
     return detectar_optimizado(transacciones), "secuencial optimizada"
-
