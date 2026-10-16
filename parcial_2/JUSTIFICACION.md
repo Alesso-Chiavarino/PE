@@ -361,7 +361,7 @@ paralelismo no fue conveniente por su overhead.
 Para abrir la interfaz grafica:
 
 ```bash
-cd parcial_1
+cd parcial_2
 source .venv/bin/activate
 python main.py interfaz
 ```

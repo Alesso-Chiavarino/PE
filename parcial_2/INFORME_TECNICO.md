@@ -166,7 +166,7 @@ archivos CSV, los graficos y los perfiles completos quedan en `resultados/`.
 ## Ejecucion para la demostracion
 
 ```bash
-cd parcial_1
+cd parcial_2
 source .venv/bin/activate
 python main.py interfaz
 ```

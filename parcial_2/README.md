@@ -14,11 +14,11 @@ calidad y documentacion automatica.
 
 ## Como ejecutarlo
 
-El proyecto usa Python 3.10 o posterior. La deteccion y el perfilado funcionan
-solo con la biblioteca estandar.
+El proyecto usa Python 3.10 o posterior. Las dependencias de desarrollo se
+instalan dentro de un entorno virtual.
 
 ```bash
-cd parcial_1
+cd parcial_2
 source .venv/bin/activate
 python main.py demo --transacciones 5000
 python main.py interfaz
@@ -27,7 +27,7 @@ python main.py perfilado --transacciones 5000
 python main.py escalabilidad --volumenes 1000 2500 5000
 python main.py generar-archivo --transacciones 100000 --salida datos/transacciones.csv
 python main.py analizar-archivo datos/transacciones.csv --lote 10000
-pytest
+python -m pytest
 ```
 
 La cantidad se puede cambiar en los comandos `demo`, `benchmark`, `perfilado`
@@ -40,12 +40,12 @@ ejecutar:
 
 ```bash
 python -m pip install -r requirements-dev.txt
-pytest --cov=archivos --cov=configuracion --cov=detectores \
+python -m pytest --cov=archivos --cov=configuracion --cov=detectores \
   --cov=generador --cov=algoritmos_ordenamiento --cov-report=term-missing
-flake8 .
+python -m flake8 .
 python main.py perfilado --transacciones 5000
-snakeviz resultados/perfilado_optimizado.prof
-sphinx-build -b html docs docs/_build/html
+python -m snakeviz resultados/perfilado_optimizado.prof
+python -m sphinx -b html docs docs/_build/html
 ```
 
 `pytest` es el framework utilizado por las pruebas. SnakeViz aprovecha los

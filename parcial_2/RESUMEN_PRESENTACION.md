@@ -2,7 +2,7 @@
 
 **Materia:** Programación Eficiente — Primer Parcial  
 **Lenguaje:** Python 3.10+ (Biblioteca estándar + Matplotlib opcional para gráficos)  
-**Ubicación del Proyecto:** `parcial_1/`
+**Ubicación del Proyecto:** `parcial_2/`
 
 ---
 
@@ -11,7 +11,7 @@
 Abre la terminal en la raíz del repositorio y corre:
 
 ```bash
-cd parcial_1
+cd parcial_2
 source .venv/bin/activate
 ```
 
@@ -75,7 +75,7 @@ source .venv/bin/activate
 - **Si se hubiera hecho de otra forma:** Si procesáramos las operaciones sin ordenamiento previo, no podríamos computar diferencias de tiempo continuas. Y si usáramos strings para representar fechas (ej. `"2026-09-11 10:00:00"`), el parseo de strings en cada ciclo consumiría órdenes de magnitud más tiempo de CPU que una resta de enteros.
 
 ### Código para Captura (Slide 1)
-> **Ubicación:** [`modelos.py`](file:///home/franco/Repositories/PE/PE/parcial_1/modelos.py#L4-L20) y [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_1/detectores.py#L15-L20)
+> **Ubicación:** [`modelos.py`](file:///home/franco/Repositories/PE/PE/parcial_2/modelos.py#L4-L20) y [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_2/detectores.py#L15-L20)
 
 ```python
 # modelos.py - Entidad inmutable ultraliviana con slots
@@ -123,7 +123,7 @@ LIMITE_MONTO_FIJO = 1200.0     # Piso minimo estadistico
 - **Si se hubiera dejado así:** Con 100 transacciones funciona en 0.002s, pero con 5.000 transacciones tarda 1.56s. Con 50.000 transacciones tardaría más de 2 minutos, haciendo inviable el sistema.
 
 ### Código para Captura (Slide 2)
-> **Ubicación:** [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_1/detectores.py#L94-L122)
+> **Ubicación:** [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_2/detectores.py#L94-L122)
 
 ```python
 # detectores.py -> detectar_inicial()
@@ -177,7 +177,7 @@ def detectar_inicial(transacciones: list[Transaccion]) -> list[Alerta]:
 - **Qué observamos en las mediciones:** Con 1.000 transacciones tardó 0.09s; con 5.000 transacciones saltó a 1.65s (se multiplicó por casi 19 veces).
 
 ### Código para Captura (Slide 3)
-> **Ubicación:** [`algoritmos_ordenamiento.py`](file:///home/franco/Repositories/PE/PE/parcial_1/algoritmos_ordenamiento.py#L8-L24)
+> **Ubicación:** [`algoritmos_ordenamiento.py`](file:///home/franco/Repositories/PE/PE/parcial_2/algoritmos_ordenamiento.py#L8-L24)
 
 ```python
 # algoritmos_ordenamiento.py -> ordenar_burbuja()
@@ -237,7 +237,7 @@ def ordenar_burbuja(transacciones: list[Transaccion]) -> list[Transaccion]:
 - **Si se hubiera mantenido listas comunes:** Cada vez que una transacción vencía en la ventana temporal, el sistema desperdiciaba ciclos de CPU reacomodando memoria en el heap de Python.
 
 ### Código para Captura (Slide 4)
-> **Ubicación:** [`algoritmos_ordenamiento.py`](file:///home/franco/Repositories/PE/PE/parcial_1/algoritmos_ordenamiento.py#L26-L45) y [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_1/detectores.py#L190-L245)
+> **Ubicación:** [`algoritmos_ordenamiento.py`](file:///home/franco/Repositories/PE/PE/parcial_2/algoritmos_ordenamiento.py#L26-L45) y [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_2/detectores.py#L190-L245)
 
 ```python
 # 1. Quicksort con Divide y Venceras: O(n log n) promedio
@@ -295,7 +295,7 @@ for tx in grupo:
 - **Si no se invalidara:** Un usuario que cambió su patrón de consumo seguiría siendo evaluado con su comportamiento del mes pasado.
 
 ### Código para Captura (Slide 5)
-> **Ubicación:** [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_1/detectores.py#L42-L68)
+> **Ubicación:** [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_2/detectores.py#L42-L68)
 
 ```python
 # detectores.py -> CachePerfiles
@@ -351,7 +351,7 @@ class CachePerfiles:
 - **Si hubiéramos asumido a ciegas que 'paralelo siempre es mejor':** Habríamos puesto en producción una solución que consume 15 veces más memoria RAM (1.17 MB vs 0.08 MB) y tarda 12 veces más tiempo (0.215 s vs 0.017 s). Demostramos criterio ingenieril al descartar una técnica cuando las métricas comprueban que no aporta valor neto.
 
 ### Código para Captura (Slide 6)
-> **Ubicación:** [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_1/detectores.py#L340-L368)
+> **Ubicación:** [`detectores.py`](file:///home/franco/Repositories/PE/PE/parcial_2/detectores.py#L340-L368)
 
 ```python
 # detectores.py -> detectar_paralelo()
@@ -403,7 +403,7 @@ def detectar_paralelo(transacciones: list[Transaccion], trabajadores: int | None
 - **Si hubiéramos optimizado por intuición:** Podríamos haber intentado optimizar las operaciones matemáticas de la varianza o el generador de datos, logrando mejoras imperceptibles porque esas funciones no representaban ni el 1% del cuello de botella.
 
 ### Código para Captura (Slide 7)
-> **Ubicación:** [`perfilado.py`](file:///home/franco/Repositories/PE/PE/parcial_1/perfilado.py#L12-L28) y salida en consola
+> **Ubicación:** [`perfilado.py`](file:///home/franco/Repositories/PE/PE/parcial_2/perfilado.py#L12-L28) y salida en consola
 
 ```python
 # perfilado.py -> _perfilar()
@@ -459,7 +459,7 @@ def _perfilar(nombre: str, funcion, transacciones, carpeta: Path):
 > - *Nuestra versión optimizada procesa las 100.000 transacciones en **menos de medio segundo**."*
 
 ### 📸 Código y Gráficos para la Diapositiva (Slide 8)
-> **Ubicación:** [`medicion.py`](file:///home/franco/Repositories/PE/PE/parcial_1/medicion.py#L40-L59) y datos de [`comparacion.csv`](file:///home/franco/Repositories/PE/PE/parcial_1/resultados/comparacion.csv)
+> **Ubicación:** [`medicion.py`](file:///home/franco/Repositories/PE/PE/parcial_2/medicion.py#L40-L59) y datos de [`comparacion.csv`](file:///home/franco/Repositories/PE/PE/parcial_2/resultados/comparacion.csv)
 
 ```python
 # medicion.py -> _medir()
