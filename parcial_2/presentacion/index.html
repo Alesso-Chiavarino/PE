@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detector de Transacciones Sospechosas — Segundo Parcial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080a12;
+      --surface: #101424;
+      --surface2: #161c32;
+      --border: rgba(255,255,255,0.08);
+      --accent: #6366f1;
+      --accent2: #8b5cf6;
+      --accent3: #22d3ee;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --code-bg: #0a0d18;
+      --radius: 12px;
+      --radius-lg: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .slides-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 32px 48px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(60px);
+      transition: opacity 0.4s cubic-bezier(0.16,1,0.3,1), transform 0.4s cubic-bezier(0.16,1,0.3,1);
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0);
+    }
+
+    .slide.exit-left {
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    .slide-header {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slide-header::before {
+      content: '';
+      display: inline-block;
+      width: 18px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 99px;
+    }
+
+    h1.title {
+      font-size: clamp(34px, 4.5vw, 54px);
+      font-weight: 800;
+      line-height: 1.12;
+      background: linear-gradient(135deg, #ffffff 30%, var(--accent3) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    h2.section-title {
+      font-size: clamp(24px, 3vw, 36px);
+      font-weight: 700;
+      line-height: 1.2;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    p.subtitle {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 640px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-purple { background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
+    .badge-green  { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-cyan   { background: rgba(34,211,238,0.15); color: #67e8f9; border: 1px solid rgba(34,211,238,0.3); }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+    }
+
+    .card-accent {
+      border-color: rgba(99,102,241,0.35);
+      background: linear-gradient(135deg, rgba(99,102,241,0.08), var(--surface));
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; width: 100%; }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.65;
+      overflow-x: auto;
+      width: 100%;
+      position: relative;
+    }
+
+    .code-block .lang-tag {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .kw  { color: #c678dd; }
+    .fn  { color: #61afef; }
+    .str { color: #98c379; }
+    .num { color: #d19a66; }
+    .cm  { color: #5c6370; font-style: italic; }
+    .dec { color: var(--accent3); }
+    .cls { color: #e5c07b; }
+
+    .diff-block {
+      background: var(--code-bg);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: var(--radius);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.65;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .diff-block .diff-header {
+      background: rgba(255,255,255,.04);
+      padding: 8px 16px;
+      font-size: 11px;
+      color: var(--muted);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .diff-line { padding: 2px 16px; display: block; }
+    .diff-line.add { background: rgba(16,185,129,.1); color: #a7f3d0; }
+    .diff-line.del { background: rgba(239,68,68,.1); color: #fca5a5; }
+    .diff-line.ctx { color: var(--muted); }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(99,102,241,.06), transparent);
+    }
+
+    .metric-value {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .perf-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .perf-table th {
+      background: rgba(99,102,241,.12);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 10px 16px;
+      text-align: left;
+    }
+    .perf-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text); }
+    .perf-table tr:last-child td { border-bottom: none; }
+    .perf-table tr:hover td { background: rgba(255,255,255,.03); }
+    .td-best { color: var(--green); font-weight: 600; }
+    .td-bad  { color: var(--red); }
+    .td-mid  { color: var(--yellow); }
+
+    .check-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .check-list li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.5; }
+    .check-list li .icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(99,102,241,.1), rgba(34,211,238,.05));
+      border: 1px solid rgba(99,102,241,.25);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .tag {
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .bar-chart { width: 100%; }
+    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .bar-label { font-size: 12px; color: var(--muted); min-width: 160px; }
+    .bar-track { flex: 1; height: 8px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 99px; transition: width 1.2s ease; }
+    .bar-val { font-size: 12px; font-weight: 600; min-width: 60px; text-align: right; }
+
+    .terminal-output {
+      background: #0d0f16;
+      border: 1px solid rgba(34,211,238,.18);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.8;
+      color: #c8d3f5;
+      white-space: pre;
+      overflow-x: auto;
+      width: 100%;
+    }
+    .terminal-output .t-hi  { color: var(--accent3); }
+    .terminal-output .t-num { color: var(--yellow); }
+    .terminal-output .t-hd  { color: var(--accent); font-weight: 600; }
+    .terminal-output .t-ok  { color: var(--green); }
+    .terminal-output .t-err { color: var(--red); }
+
+    /* Screenshot images & frames — ENLARGED & CLICK-TO-ZOOM */
+    .screenshot-frame {
+      background: var(--code-bg);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      position: relative;
+      width: 100%;
+    }
+
+    .screenshot {
+      width: 100%;
+      height: auto;
+      max-height: 440px;
+      border-radius: var(--radius);
+      display: block;
+      object-fit: contain;
+      cursor: zoom-in;
+      transition: transform 0.25s ease, filter 0.25s ease;
+    }
+
+    .screenshot:hover {
+      transform: scale(1.01);
+      filter: brightness(1.05);
+    }
+
+    .screenshot-caption {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .zoom-hint {
+      font-size: 10px;
+      color: var(--accent3);
+      background: rgba(34,211,238,0.1);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* Lightbox Modal */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 8, 16, 0.94);
+      backdrop-filter: blur(12px);
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 24px;
+      cursor: zoom-out;
+    }
+
+    .lightbox.active { display: flex; }
+
+    .lightbox-img {
+      max-width: 94vw;
+      max-height: 84vh;
+      object-fit: contain;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.15);
+      animation: zoomInModal 0.22s ease-out;
+    }
+
+    .lightbox-caption {
+      margin-top: 16px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      max-width: 860px;
+      background: rgba(16,20,36,0.8);
+      padding: 8px 18px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      color: #cbd5e1;
+      font-size: 34px;
+      font-weight: 300;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .lightbox-close:hover { color: #fff; }
+
+    @keyframes zoomInModal {
+      from { opacity: 0; transform: scale(0.94); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .cover-bg { position: absolute; inset: 0; overflow: hidden; z-index: -1; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .35; }
+    .orb1 { width: 500px; height: 500px; background: var(--accent); top: -200px; right: -100px; }
+    .orb2 { width: 400px; height: 400px; background: var(--accent3); bottom: -150px; left: -100px; }
+    .orb3 { width: 300px; height: 300px; background: var(--accent2); top: 40%; left: 30%; }
+
+    .slide > .content {
+      max-width: 1240px;
+      width: 100%;
+      padding: 0 16px;
+    }
+
+    .w-full { width: 100%; }
+    .mt-3 { margin-top: 12px; }
+    .mt-4 { margin-top: 16px; }
+    .mt-6 { margin-top: 24px; }
+    .mb-3 { margin-bottom: 12px; }
+    .mb-4 { margin-bottom: 16px; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .text-center { text-align: center; }
+    .gap-4 { gap: 16px; }
+    .gap-3 { gap: 12px; }
+
+    kbd {
+      display: inline-block;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .cover-img {
+      position: absolute;
+      inset: 0;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      opacity: .18;
+      z-index: -1;
+    }
+
+    /* Navigation bar */
+    nav {
+      height: 60px;
+      background: rgba(16, 20, 36, 0.85);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 100;
+    }
+
+    nav button {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    nav button:hover:not(:disabled) {
+      background: rgba(99,102,241,0.2);
+      border-color: rgba(99,102,241,0.4);
+      color: #fff;
+    }
+
+    nav button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .dot-nav {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .dot.active {
+      width: 24px;
+      background: var(--accent);
+    }
+
+    #slide-counter {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      min-width: 60px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent3));
+      width: 100%;
+      transform-origin: left;
+      transform: scaleX(0);
+      transition: transform 0.35s ease;
+      z-index: 200;
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+<div class="slides-wrapper" id="slides">
+
+<!-- ============================================================
+     SLIDE 0 — PORTADA
+============================================================ -->
+<div class="slide active" id="slide-0">
+  <div class="cover-bg">
+    <img class="cover-img" src="assets/portada-transacciones.png" alt="" />
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <div class="flex flex-col items-center gap-4 text-center" style="max-width:860px">
+    <div class="badge badge-purple">Programación Eficiente · UBP</div>
+    <h1 class="title">Detector de Transacciones<br/>Sospechosas</h1>
+    <p class="subtitle">Segundo Parcial — Optimización, observabilidad, refactorización y pruebas</p>
+    <div class="tag-row" style="justify-content:center;margin-top:20px">
+      <span class="tag">🐍 Python</span>
+      <span class="tag">📊 SnakeViz</span>
+      <span class="tag">⏱️ psutil</span>
+      <span class="tag">📁 Archivos grandes</span>
+      <span class="tag">📖 PEP 8</span>
+      <span class="tag">📚 Sphinx</span>
+      <span class="tag">🔍 flake8</span>
+      <span class="tag">⚡ Refactorización</span>
+      <span class="tag">🧪 pytest</span>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:32px">Usá <kbd>←</kbd> <kbd>→</kbd> o los botones de abajo para navegar</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 1 — ÍNDICE COMPLETO (10 TEMAS DE LA CÁTEDRA)
+============================================================ -->
+<div class="slide" id="slide-1">
+  <div class="content">
+    <div class="slide-header">Índice</div>
+    <h2 class="section-title">¿Qué vamos a ver?</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:20px">Los 10 temas solicitados por la cátedra para el segundo parcial, implementados y validados.</p>
+    <div class="grid-2" style="gap:12px">
+      <div class="card card-accent" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">✂️ 1. Código redundante</div>
+        <div style="font-size:12px;color:var(--muted)">DRY — ConfiguracionDeteccion y EstadoDeteccionUsuario</div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">📊 2. Optimización y profiling</div>
+        <div style="font-size:12px;color:var(--muted)">SnakeViz + cProfile — Cuello de botella en burbuja (50×)</div>
+      </div>
+      <div class="card card-accent" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">⏱️ 3. Herramientas generales</div>
+        <div style="font-size:12px;color:var(--muted)">psutil vs New Relic / Elastic APM — Observabilidad proporcional</div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">📁 4. Archivos grandes</div>
+        <div style="font-size:12px;color:var(--muted)">Buffer de 1 MB · Batching · Generadores · 100k tx en 39 MB</div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">📖 5. Legibilidad y mantenibilidad</div>
+        <div style="font-size:12px;color:var(--muted)">PEP 8 · Nombres descriptivos · Docstrings tipados</div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">📚 6. Generación de documentación</div>
+        <div style="font-size:12px;color:var(--muted)">Sphinx — HTML generado desde docstrings con autodoc</div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">🔍 7. Análisis de calidad</div>
+        <div style="font-size:12px;color:var(--muted)">flake8 — Linter estático y cumplimiento estricto</div>
+      </div>
+      <div class="card" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">🔨 8. Refactorización</div>
+        <div style="font-size:12px;color:var(--muted)">Principios SRP y desacoplamiento para streaming</div>
+      </div>
+      <div class="card card-accent" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">🧪 9. Testing (pytest + psutil)</div>
+        <div style="font-size:12px;color:var(--muted)">15 pruebas unitarias, fixtures, parametrización y recursos</div>
+      </div>
+      <div class="card card-accent" style="padding:14px 18px">
+        <div style="font-size:18px;margin-bottom:4px">⚙️ 10. Uso de framework (pytest)</div>
+        <div style="font-size:12px;color:var(--muted)">pytest como framework central, pyproject.toml y plugins</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 2 — PANORAMA GENERAL (DIFF)
+============================================================ -->
+<div class="slide" id="slide-2">
+  <div class="content">
+    <div class="slide-header">Panorama general</div>
+    <h2 class="section-title">Parcial 1 → Parcial 2</h2>
+    <div class="mt-4 w-full">
+      <div class="diff-block">
+        <div class="diff-header">Resumen de refactorizaciones — git diff master...parcial2</div>
+        <span class="diff-line del">- Umbrales definidos como constantes dispersas por el archivo</span>
+        <span class="diff-line add">+ ConfiguracionDeteccion centraliza todos los valores en un dataclass inmutable</span>
+        <span class="diff-line ctx"> </span>
+        <span class="diff-line del">- _detectar_grupo administraba colas, contadores y alertas juntas (monolito)</span>
+        <span class="diff-line add">+ EstadoDeteccionUsuario encapsula el estado por usuario para memoria y streaming</span>
+        <span class="diff-line ctx"> </span>
+        <span class="diff-line del">- Argumentos --transacciones y --semilla duplicados en cada subcomando CLI</span>
+        <span class="diff-line add">+ _agregar_datos_generados() define las opciones una sola vez (DRY)</span>
+        <span class="diff-line ctx"> </span>
+        <span class="diff-line del">- Dos funciones distintas escribían CSV con lógica idéntica</span>
+        <span class="diff-line add">+ _guardar_filas_csv() concentra la operación de persistencia</span>
+        <span class="diff-line ctx"> </span>
+        <span class="diff-line del">- Pruebas agrupadas en unittest con boilerplate excesivo</span>
+        <span class="diff-line add">+ pytest con fixtures scoped, parametrización y validación de recursos</span>
+        <span class="diff-line ctx"> </span>
+        <span class="diff-line del">- generar_transacciones() creaba toda la lista en RAM</span>
+        <span class="diff-line add">+ iterar_transacciones_ordenadas() → generador yield streaming (O(1) memoria)</span>
+        <span class="diff-line ctx"> </span>
+        <span class="diff-line add">+ archivos.py: lectura/escritura CSV con buffer de 1 MB y batching configurable</span>
+        <span class="diff-line add">+ monitoreo.py: psutil para medir CPU, memoria RSS y E/S del proceso local</span>
+        <span class="diff-line add">+ docs/: Sphinx con autodoc, viewcode y tema responsive</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 3 — TEMA 1: CÓDIGO REDUNDANTE (PARTE 1)
+============================================================ -->
+<div class="slide" id="slide-3">
+  <div class="content">
+    <div class="slide-header">Tema 1 — Eliminación de código redundante</div>
+    <h2 class="section-title">✂️ Configuración centralizada (DRY)</h2>
+    <div class="grid-2 mt-6">
+      <div class="card">
+        <p class="badge badge-yellow mb-4" style="display:inline-flex">❌ Antes — constantes dispersas</p>
+        <div class="code-block" style="font-size:11.5px">
+<span class="lang-tag">parcial_1 / detectores.py</span>
+<span class="cm"># esparcidas por el archivo</span>
+<span class="cls">VENTANA_RAFAGA</span> = <span class="num">60</span>
+<span class="cls">MINIMO_RAFAGA</span> = <span class="num">5</span>
+<span class="cls">VENTANA_REPETICION</span> = <span class="num">300</span>
+<span class="cls">MINIMO_REPETICIONES</span> = <span class="num">3</span>
+<span class="cls">VENTANA_UBICACIONES</span> = <span class="num">120</span>
+<span class="cls">LIMITE_MONTO_FIJO</span> = <span class="num">1200.0</span>
+<span class="cm"># se pasaban sueltas como parámetros a cada función</span></div>
+      </div>
+      <div class="card card-accent">
+        <p class="badge badge-green mb-4" style="display:inline-flex">✅ Después — configuración centralizada</p>
+        <div class="code-block" style="font-size:11.5px">
+<span class="lang-tag">parcial_2 / configuracion.py</span>
+<span class="dec">@dataclass</span>(<span class="str">frozen=True</span>, <span class="str">slots=True</span>)
+<span class="kw">class</span> <span class="cls">ConfiguracionDeteccion</span>:
+    <span class="str">"""Agrupa los umbrales del detector."""</span>
+    ventana_rafaga: <span class="cls">int</span> = <span class="num">60</span>
+    minimo_rafaga: <span class="cls">int</span> = <span class="num">5</span>
+    ventana_repeticion: <span class="cls">int</span> = <span class="num">300</span>
+    minimo_repeticiones: <span class="cls">int</span> = <span class="num">3</span>
+    ventana_ubicaciones: <span class="cls">int</span> = <span class="num">120</span>
+    limite_monto_fijo: <span class="cls">float</span> = <span class="num">1200.0</span>
+
+CONFIGURACION_PREDETERMINADA = <span class="fn">ConfiguracionDeteccion</span>()</div>
+      </div>
+    </div>
+    <div class="highlight-box mt-6">
+      💡 <strong>Principio DRY</strong> — Un único punto de verdad para los parámetros del negocio. Facilita la inyección de configuraciones en tests unitarios sin modificar código de producción.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 4 — TEMA 1: CÓDIGO REDUNDANTE (PARTE 2)
+============================================================ -->
+<div class="slide" id="slide-4">
+  <div class="content">
+    <div class="slide-header">Tema 1 — continuación</div>
+    <h2 class="section-title">✂️ EstadoDeteccionUsuario (OOP)</h2>
+    <div class="grid-2 mt-6">
+      <div class="card">
+        <p class="badge badge-yellow mb-4" style="display:inline-flex">❌ Antes — variables locales repetidas</p>
+        <div class="code-block" style="font-size:11.5px">
+<span class="cm"># duplicadas en detectar_inicial y en _detectar_grupo</span>
+ventana_rafaga = <span class="fn">deque</span>()
+ventana_repeticion = <span class="fn">deque</span>()
+ventana_ubicaciones = <span class="fn">deque</span>()
+cantidad_firmas = <span class="fn">defaultdict</span>(<span class="cls">int</span>)
+cantidad_ubicaciones = <span class="fn">defaultdict</span>(<span class="cls">int</span>)
+emitidas = <span class="fn">set</span>()
+<span class="cm"># la lógica de depuración de ventanas se repetía 2 veces</span></div>
+      </div>
+      <div class="card card-accent">
+        <p class="badge badge-green mb-4" style="display:inline-flex">✅ Después — estado encapsulado</p>
+        <div class="code-block" style="font-size:11.5px">
+<span class="kw">class</span> <span class="cls">EstadoDeteccionUsuario</span>:
+    <span class="str">"""Mantiene ventanas temporales entre transacciones."""</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="cls">self</span>, perfil, cfg):
+        <span class="cls">self</span>.ventana_rafaga = <span class="fn">deque</span>()
+        <span class="cls">self</span>.ventana_repeticion = <span class="fn">deque</span>()
+        <span class="cls">self</span>.ventana_ubicaciones = <span class="fn">deque</span>()
+        <span class="cls">self</span>.emitidas = <span class="fn">set</span>()
+
+    <span class="kw">def</span> <span class="fn">procesar</span>(<span class="cls">self</span>, tx) -> <span class="cls">list</span>:
+        <span class="str">"""Aplica reglas y emite alertas."""</span>
+        ...</div>
+      </div>
+    </div>
+    <div class="highlight-box mt-6">
+      🔑 <strong>Reutilización total</strong> — La misma clase procesa listas completas en memoria y lotes en streaming CSV, sin duplicar ni una línea de la lógica temporal.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 5 — TEMA 2: OPTIMIZACIÓN Y PROFILING (SNAKEVIZ)
+============================================================ -->
+<div class="slide" id="slide-5">
+  <div class="content">
+    <div class="slide-header">Tema 2 — Compiladores y herramientas de optimización</div>
+    <h2 class="section-title">📊 SnakeViz — Profiling visual interactivo</h2>
+    <div class="grid-2 mt-4" style="align-items:center">
+      <div class="flex flex-col gap-4">
+        <ul class="check-list">
+          <li><span class="icon">📌</span>Visualiza archivos de perfilado <code>cProfile</code> de forma gráfica en el navegador.</li>
+          <li><span class="icon">🌳</span>Diagrama <em>icicle chart</em>: el ancho de cada bloque representa el tiempo acumulado.</li>
+          <li><span class="icon">⏱️</span>Permite identificar de un vistazo el call-stack y la función cuello de botella.</li>
+          <li><span class="icon">💾</span>Los perfiles <code>.prof</code> se exportan para comparar antes y después de refactorizar.</li>
+        </ul>
+        <div class="highlight-box">
+          <strong>Comandos ejecutados:</strong><br/>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent3)">
+            python main.py perfilado --transacciones 5000<br/>
+            snakeviz resultados/perfilado_inicial.prof<br/>
+            snakeviz resultados/perfilado_optimizado.prof
+          </span>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/SNAKEVIZ: perfilado optimizado vs perfilado inicial.jpeg" alt="SnakeViz — versión optimizada" />
+        </div>
+        <p class="screenshot-caption">SnakeViz — versión optimizada: <code>detectar_optimizado</code> en apenas 0.0205 s <span class="zoom-hint">🔍 click zoom</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 6 — TEMA 2: CUELLO DE BOTELLA IDENTIFICADO
+============================================================ -->
+<div class="slide" id="slide-6">
+  <div class="content">
+    <div class="slide-header">Tema 2 — Cuello de botella identificado</div>
+    <h2 class="section-title mb-3">📊 SnakeViz: ordenar_burbuja como bottleneck</h2>
+    <div class="grid-2 mt-3" style="align-items:center">
+      <div class="flex flex-col gap-2">
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/WhatsApp Image 2026-10-16 at 5.33.17 PM.jpeg" alt="SnakeViz — versión inicial, burbuja dominante" />
+        </div>
+        <p class="screenshot-caption">SnakeViz inicial — <strong>ordenar_burbuja</strong> consume el 51% del tiempo total (0.647 s de 1.27 s) <span class="zoom-hint">🔍 click zoom</span></p>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="card" style="padding:14px">
+          <p style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Salida de cProfile</p>
+          <div class="terminal-output" style="font-size:10.5px">
+<span class="t-hd">   ncalls  tottime  cumtime  fn</span>
+        1  <span class="t-err">1.357</span>    <span class="t-err">2.575</span>  detectar_inicial
+        1  <span class="t-err">1.007</span>    <span class="t-err">1.007</span>  <span class="t-err">ordenar_burbuja</span>
+     5000  0.028    0.196  _calcular_perfil
+<span class="t-err">344 111 llamadas — 2.575 seg</span>
+
+<span class="t-hd">   ncalls  tottime  cumtime  fn (optimizado)</span>
+        1  0.000    <span class="t-ok">0.051</span>  detectar_optimizado
+ 6747/101  0.011    <span class="t-ok">0.012</span>  <span class="t-ok">ordenar_quicksort</span>
+<span class="t-ok">86 384 llamadas — 0.051 seg (~50× más rápido)</span></div>
+        </div>
+        <div class="highlight-box" style="font-size:12px">
+          🎯 <strong>Diagnóstico guiado por profiling:</strong> Reemplazo de Bubble Sort O(n²) por Quicksort O(n log n) + Cache LRU de perfiles. Tiempo: <span style="color:var(--red)">2.575 s</span> → <span style="color:var(--green)">0.051 s</span>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 7 — RESULTADOS MEDIDOS: COMPARATIVA DE VERSIONES
+============================================================ -->
+<div class="slide" id="slide-7">
+  <div class="content">
+    <div class="slide-header">Resultados medidos</div>
+    <h2 class="section-title mb-4">⚡ Comparación empírica (5 000 transacciones)</h2>
+    <div class="card w-full" style="padding:0;overflow:hidden">
+      <table class="perf-table">
+        <thead>
+          <tr><th>Versión</th><th>Tiempo (s)</th><th>Memoria (MB)</th><th>Alertas</th><th>Observación técnica</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>🐢 Implementación inicial</td><td class="td-bad">2.855</td><td>0.08</td><td>9</td><td style="color:var(--muted);font-size:12px">Burbuja + búsquedas lineales O(n²)</td></tr>
+          <tr><td>🔧 Estructura optimizada</td><td class="td-mid">0.160</td><td>0.06</td><td>9</td><td style="color:var(--muted);font-size:12px">Uso de dict, deque, set</td></tr>
+          <tr><td>🚀 Algoritmo optimizado</td><td class="td-best">0.055</td><td>0.08</td><td>9</td><td style="color:var(--muted);font-size:12px">Quicksort + cache LRU</td></tr>
+          <tr><td>⚠️ Concurrencia (2 workers)</td><td class="td-mid">0.198</td><td class="td-bad">1.20</td><td>9</td><td style="color:var(--muted);font-size:12px">Overhead de IPC supera el beneficio</td></tr>
+          <tr><td>✅ Versión final</td><td class="td-best">0.051</td><td>0.08</td><td>9</td><td style="color:var(--green);font-size:12px">Secuencial óptima</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2 mt-6">
+      <div class="metric"><div class="metric-value" style="color:var(--green)">56×</div><div class="metric-label">aceleración frente a la baseline</div></div>
+      <div class="metric"><div class="metric-value" style="color:var(--accent3)">9 / 9</div><div class="metric-label">alertas idénticas verificadas en todas las versiones</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 8 — RESULTADOS MEDIDOS: ESCALABILIDAD
+============================================================ -->
+<div class="slide" id="slide-8">
+  <div class="content">
+    <div class="slide-header">Resultados medidos</div>
+    <h2 class="section-title mb-4">📈 Escalabilidad — O(n²) vs O(n log n)</h2>
+    <div class="card w-full mb-4">
+      <div class="bar-chart">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Tiempo inicial (Bubble Sort O(n²))</p>
+        <div class="bar-row"><div class="bar-label">1 000 tx</div><div class="bar-track"><div class="bar-fill" style="width:4.2%;background:var(--red)"></div></div><div class="bar-val" style="color:var(--red)">0.112 s</div></div>
+        <div class="bar-row"><div class="bar-label">2 500 tx</div><div class="bar-track"><div class="bar-fill" style="width:21%;background:var(--yellow)"></div></div><div class="bar-val" style="color:var(--yellow)">0.563 s</div></div>
+        <div class="bar-row"><div class="bar-label">5 000 tx</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--red)"></div></div><div class="bar-val" style="color:var(--red)">2.674 s</div></div>
+        <p style="font-size:11px;color:var(--muted);margin:16px 0 12px;text-transform:uppercase;letter-spacing:1px">Tiempo optimizado (Quicksort O(n log n))</p>
+        <div class="bar-row"><div class="bar-label">1 000 tx</div><div class="bar-track"><div class="bar-fill" style="width:26%;background:var(--green)"></div></div><div class="bar-val" style="color:var(--green)">0.005 s</div></div>
+        <div class="bar-row"><div class="bar-label">2 500 tx</div><div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--green)"></div></div><div class="bar-val" style="color:var(--green)">0.009 s</div></div>
+        <div class="bar-row"><div class="bar-label">5 000 tx</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--green)"></div></div><div class="bar-val" style="color:var(--green)">0.018 s</div></div>
+      </div>
+    </div>
+    <div class="grid-3" style="gap:12px">
+      <div class="metric"><div class="metric-value" style="color:var(--accent3)">24×</div><div class="metric-label">mejora a 1 000 tx</div></div>
+      <div class="metric"><div class="metric-value" style="color:var(--accent3)">62×</div><div class="metric-label">mejora a 2 500 tx</div></div>
+      <div class="metric"><div class="metric-value" style="color:var(--green)">148×</div><div class="metric-label">mejora a 5 000 tx</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 9 — TEMA 3: HERRAMIENTAS GENERALES (psutil vs APMs)
+============================================================ -->
+<div class="slide" id="slide-9">
+  <div class="content">
+    <div class="slide-header">Tema 3 — Herramientas Generales de Observabilidad</div>
+    <h2 class="section-title">⏱️ psutil — Alternativa a New Relic y Elastic APM</h2>
+    <div class="grid-2 mt-4" style="align-items:center">
+      <div class="flex flex-col gap-2">
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/psutil.jpeg" alt="psutil: observabilidad simple para un proceso local" />
+        </div>
+        <p class="screenshot-caption">psutil: observabilidad local vs plataformas APM cloud <span class="zoom-hint">🔍 click zoom</span></p>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="card card-accent" style="padding:16px">
+          <p style="font-weight:600;font-size:14px;color:var(--accent3);margin-bottom:8px">⚖️ ¿Por qué no New Relic o Elastic APM?</p>
+          <ul class="check-list" style="font-size:12.5px">
+            <li><span class="icon">💻</span><strong>Alcance CLI/Batch:</strong> Es un proceso local por lotes, no un microservicio desplegado en cloud 24/7.</li>
+            <li><span class="icon">🚫</span><strong>Sin infraestructura externa:</strong> New Relic y Elastic APM exigen agentes residentes, daemons y cuentas cloud.</li>
+            <li><span class="icon">🎯</span><strong>Métricas exactas:</strong> <code>psutil</code> mide RSS máxima, CPU y E/S directamente sobre el PID local.</li>
+            <li><span class="icon">📉</span><strong>Trade-off transparente:</strong> No provee trazas distribuidas ni dashboards históricos, pero es 100% proporcional al problema.</li>
+          </ul>
+        </div>
+        <div class="highlight-box" style="font-size:12px">
+          🧩 <strong>Integrado en <code>monitoreo.py</code>:</strong> La función <code>medir_recursos()</code> envuelve la ejecución, toma snapshots de CPU/RAM con psutil y se imprime al finalizar <code>analizar-archivo</code>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 10 — TEMA 4: ARCHIVOS GRANDES (BATCHING Y BUFFER)
+============================================================ -->
+<div class="slide" id="slide-10">
+  <div class="content">
+    <div class="slide-header">Tema 4 — Escritura y lectura de archivos grandes</div>
+    <h2 class="section-title">📁 Batching · Buffer · Procesamiento Streaming</h2>
+    <div class="grid-2 mt-4" style="align-items:center">
+      <div class="flex flex-col gap-3">
+        <ul class="check-list" style="font-size:13px">
+          <li><span class="icon">🔁</span><strong>Buffer de 1 MB:</strong> <code>buffering=1024*1024</code> al abrir archivos CSV para minimizar llamadas al sistema de archivos.</li>
+          <li><span class="icon">📦</span><strong>Batching:</strong> <code>agrupar_en_lotes()</code> procesa transacciones en bloques configurables (ej. 10 000).</li>
+          <li><span class="icon">⚡</span><strong>Generadores:</strong> Streaming continuo con <code>yield</code> sin almacenar todo el archivo en memoria.</li>
+          <li><span class="icon">🔄</span><strong>Dos pasadas O(1) memoria:</strong>
+            <br/>1.ª pasada calcula perfiles con algoritmo online de Welford.
+            <br/>2.ª pasada evalúa ventanas sin perder transacciones en los límites del lote.</li>
+        </ul>
+        <div class="highlight-box" style="font-size:12px">
+          🎯 <strong>Resultado medido con psutil:</strong> <strong>100 000 transacciones</strong> procesadas en sólo <strong>0.50 s</strong> y consumiendo apenas <strong>39.52 MB de RAM</strong>.
+        </div>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/primero generamos un archivo y guardamos csv de transacciones 100000.jpeg" alt="Generación de CSV con 100 000 transacciones" />
+        </div>
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/y despues corremos.jpeg" alt="Análisis de archivo CSV con lote de 10 000" />
+        </div>
+        <p class="screenshot-caption">Generación de 100k tx y posterior análisis por lotes con métricas de psutil <span class="zoom-hint">🔍 click zoom</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 11 — TEMA 5 Y 7: LEGIBILIDAD, PEP 8 Y FLAKE8
+============================================================ -->
+<div class="slide" id="slide-11">
+  <div class="content">
+    <div class="slide-header">Tema 5 y 7 — Legibilidad, PEP 8 y Análisis de Calidad</div>
+    <h2 class="section-title">📖 PEP 8 · Nombres descriptivos · flake8</h2>
+    <div class="grid-2 mt-4" style="align-items:center">
+      <div class="flex flex-col gap-2">
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/USO DE FLAKE8.jpeg" alt="Uso de flake8 detectando E265" />
+        </div>
+        <p class="screenshot-caption">flake8 detecta advertencia E265 en comentario sin espacio y guía la corrección <span class="zoom-hint">🔍 click zoom</span></p>
+        <div class="highlight-box" style="font-size:12px">
+          <code>python -m flake8 .</code><br/>
+          Análisis estático de calidad: no permite líneas > 88 caracteres, imports desordenados ni comentarios mal formateados.
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/agregar PEP8 , como usamos las buenas practicas que indica.jpeg" alt="Nombres descriptivos y docstrings en el código" />
+        </div>
+        <p class="screenshot-caption">Nombres autodocumentados (<code>tamanio_buffer</code>, <code>ultimo_instante</code>) y docstrings estructurados <span class="zoom-hint">🔍 click zoom</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 12 — TEMA 6: GENERACIÓN DE DOCUMENTACIÓN (SPHINX)
+============================================================ -->
+<div class="slide" id="slide-12">
+  <div class="content">
+    <div class="slide-header">Tema 6 — Generación de documentación</div>
+    <h2 class="section-title">📚 Sphinx — Documentación HTML desde docstrings</h2>
+    <div class="grid-2 mt-4" style="align-items:center">
+      <div class="flex flex-col gap-3">
+        <ul class="check-list" style="font-size:13px">
+          <li><span class="icon">⚙️</span><strong>Extensiones:</strong> <code>autodoc</code> (extracción automática), <code>viewcode</code> (ver código fuente) y <code>napoleon</code> (soporte estilo Google/NumPy).</li>
+          <li><span class="icon">🗂️</span><strong>Estructura modular:</strong> Módulos organizados en <em>Archivos grandes</em>, <em>Configuración</em>, <em>Detectores</em>, <em>Generación</em> y <em>Monitoreo</em>.</li>
+          <li><span class="icon">🌐</span><strong>Salida:</strong> Sitio web navegable estático listo para distribución.</li>
+        </ul>
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/USO DE Sphinx.jpeg" alt="Salida del comando sphinx-build" />
+        </div>
+        <p class="screenshot-caption">Build exitoso: <code>sphinx-build -b html docs docs/_build/html</code> <span class="zoom-hint">🔍 click zoom</span></p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/447966e8-80c6-4544-88b3-d0f0c5419543.jpeg" alt="Documentación HTML generada por Sphinx" />
+        </div>
+        <p class="screenshot-caption">Página principal de la documentación generada en HTML navegable <span class="zoom-hint">🔍 click zoom</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 13 — TEMA 8: REFACTORIZACIÓN
+============================================================ -->
+<div class="slide" id="slide-13">
+  <div class="content">
+    <div class="slide-header">Tema 8 — Refactorización</div>
+    <h2 class="section-title">🔨 Refactorización y Principios de Diseño</h2>
+    <div class="grid-2 mt-4">
+      <div class="flex flex-col gap-3">
+        <div class="card">
+          <p style="font-weight:600;margin-bottom:8px;color:var(--yellow);font-size:13px">❌ Antes — Monolito acoplado</p>
+          <div class="code-block" style="font-size:11px">
+<span class="kw">def</span> <span class="fn">detectar_inicial</span>(txs):
+    <span class="cm"># 1. agrupaba por usuario</span>
+    <span class="cm"># 2. calculaba perfiles</span>
+    <span class="cm"># 3. ejecutaba ordenamiento burbuja</span>
+    <span class="cm"># 4. administraba 3 colas temporales</span>
+    <span class="cm"># 5. emitía y formateaba alertas</span>
+    <span class="cm"># TODO mezclado en >120 líneas</span></div>
+        </div>
+        <div class="card card-accent">
+          <p style="font-weight:600;margin-bottom:8px;color:var(--green);font-size:13px">✅ Después — Responsabilidades atómicas</p>
+          <div class="code-block" style="font-size:11px">
+<span class="fn">_agrupar_por_usuario</span>()    <span class="cm"># particionado</span>
+<span class="fn">_calcular_perfil</span>()        <span class="cm"># estadística Welford</span>
+<span class="cls">CachePerfiles</span>.<span class="fn">obtener</span>()  <span class="cm"># cache LRU</span>
+<span class="cls">EstadoDeteccionUsuario</span>   <span class="cm"># estado de ventanas</span>
+<span class="fn">_ordenar_alertas</span>()       <span class="cm"># presentación final</span></div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="highlight-box">
+          <strong>Principios de diseño aplicados:</strong>
+          <ul style="margin-top:8px;padding-left:16px;font-size:13px;line-height:1.9">
+            <li><strong>SRP (Single Responsibility):</strong> Cada función o clase tiene un único motivo de cambio.</li>
+            <li><strong>DRY (Don't Repeat Yourself):</strong> Cero duplicación en parsing CLI, filtros o escritura CSV.</li>
+            <li><strong>Desacoplamiento:</strong> Los detectores no dependen del origen del dato (lista o archivo).</li>
+          </ul>
+        </div>
+        <div class="card" style="background:linear-gradient(135deg,rgba(16,185,129,.08),transparent)">
+          <p style="font-size:11px;color:var(--green);font-weight:600;margin-bottom:6px">VENTAJA CLAVE</p>
+          <p style="font-size:13px;line-height:1.6"><code>iterar_alertas_csv()</code> reutiliza <code>EstadoDeteccionUsuario</code> directamente sobre streaming sin haber tenido que clonar la lógica de detección.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 14 — TEMA 9: TESTING CON PYTEST Y PSUTIL
+============================================================ -->
+<div class="slide" id="slide-14">
+  <div class="content">
+    <div class="slide-header">Tema 9 — Testing con pytest y psutil</div>
+    <h2 class="section-title">🧪 pytest + psutil — Pruebas y validación de recursos</h2>
+    <div class="grid-2 mt-4" style="align-items:center">
+      <div class="flex flex-col gap-3">
+        <div class="highlight-box" style="font-size:12.5px">
+          <strong>Suite completa:</strong> pytest valida la corrección funcional y <strong>psutil</strong> verifica el consumo de CPU y memoria en <code>test_monitoreo.py</code>.
+        </div>
+        <div class="code-block" style="font-size:11px">
+<span class="dec">@pytest.fixture</span>(scope=<span class="str">"module"</span>)
+<span class="kw">def</span> <span class="fn">transacciones</span>():
+    <span class="kw">return</span> <span class="fn">generar_transacciones</span>(<span class="num">500</span>, semilla=<span class="num">7</span>)
+
+<span class="dec">@pytest.mark.parametrize</span>(<span class="str">"tam"</span>, [<span class="num">1</span>, <span class="num">7</span>, <span class="num">100</span>, <span class="num">1000</span>])
+<span class="kw">def</span> <span class="fn">test_resultado_no_depende_del_lote</span>(tmp_path, tam):
+    ruta = tmp_path / <span class="str">"tx.csv"</span>
+    txs = <span class="fn">crear_csv_temporal</span>(ruta)
+    esperadas = <span class="fn">detectar_optimizado</span>(txs)
+    <span class="kw">assert</span> <span class="fn">list</span>(<span class="fn">iterar_alertas_csv</span>(ruta, tam)) == esperadas
+
+<span class="cm"># psutil integrado en test unitario:</span>
+<span class="kw">def</span> <span class="fn">test_medir_recursos_devuelve_metricas</span>():
+    resultado, metricas = <span class="fn">medir_recursos</span>(<span class="kw">lambda</span>: <span class="fn">sum</span>(<span class="fn">range</span>(<span class="num">1000</span>)))
+    <span class="kw">assert</span> resultado == <span class="num">499_500</span>
+    <span class="kw">assert</span> metricas.memoria_rss_maxima_mb > <span class="num">0</span></div>
+        <div class="card" style="padding:12px 16px;font-size:12px">
+          <div style="font-weight:600;margin-bottom:6px">Distribución de casos:</div>
+          <ul class="check-list" style="font-size:11.5px">
+            <li><span class="icon">📝</span><code>test_detectores.py</code> (7 tests): exactitud de alertas, comparativa de versiones y cache.</li>
+            <li><span class="icon">📝</span><code>test_archivos.py</code> (7 tests): batching con 4 tamaños, buffer y streaming CSV.</li>
+            <li><span class="icon">📝</span><code>test_monitoreo.py</code> (1 test): medición de recursos con psutil.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <div class="screenshot-frame">
+          <img class="screenshot" src="assets/PYTEST.jpeg" alt="Salida real de pytest — 15 passed" />
+        </div>
+        <p class="screenshot-caption">Ejecución real de <code>pytest</code>: 15 tests pasados en 0.14 s <span class="zoom-hint">🔍 click zoom</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SLIDE 15 — TEMA 10: USO DE FRAMEWORK (PYTEST)
+============================================================ -->
+<div class="slide" id="slide-15">
+  <div class="content">
+    <div class="slide-header">Tema 10 — Uso de Framework</div>
+    <h2 class="section-title">⚙️ pytest como Framework de Desarrollo y Testing</h2>
+    <div class="grid-2 mt-4">
+      <div class="card card-accent" style="padding:18px">
+        <p style="font-weight:600;font-size:15px;color:var(--accent3);margin-bottom:10px">🧪 ¿Por qué pytest como framework?</p>
+        <ul class="check-list" style="font-size:13px">
+          <li><span class="icon">📦</span><strong>Ecosistema de plugins:</strong> Extensible con <code>pytest-cov</code> (reporte de cobertura de código), <code>pytest-xdist</code> (ejecución paralela).</li>
+          <li><span class="icon">🔧</span><strong>Sistema de Fixtures:</strong> Inyección de dependencias modular con scopes (<code>session</code>, <code>module</code>, <code>function</code>).</li>
+          <li><span class="icon">🔁</span><strong>Parametrización nativa:</strong> <code>@pytest.mark.parametrize</code> ejecuta matrices de casos sin duplicar código de prueba.</li>
+          <li><span class="icon">🔍</span><strong>Assert rewriting:</strong> Mensajes de error claros sin necesidad de <code>self.assertEqual()</code> ni jerarquías de clases rígidas.</li>
+        </ul>
+      </div>
+      <div class="flex flex-col gap-3">
+        <div class="code-block" style="font-size:11px">
+<span class="lang-tag">pyproject.toml</span>
+[project.optional-dependencies]
+dev = [
+    <span class="str">"pytest>=8.0.0"</span>,
+    <span class="str">"pytest-cov>=5.0.0"</span>,
+    <span class="str">"flake8>=7.0.0"</span>,
+    <span class="str">"sphinx>=7.0.0"</span>,
+]
+
+[tool.pytest.ini_options]
+testpaths = [<span class="str">"tests"</span>]
+addopts = <span class="str">"--strict-markers -ra --tb=short"</span>
+filterwarnings = [<span class="str">"ignore::DeprecationWarning"</span>]</div>
+        <div class="highlight-box" style="font-size:12.5px">
+          ✅ <strong>Conclusión de adopción:</strong> pytest reemplazó por completo a unittest tradicional, reduciendo el boilerplate a la mitad y permitiendo correr la suite en 0.14 s integrada en CI/CD local.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end slides-wrapper -->
+
+<!-- Lightbox Overlay -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+  <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
+  <img id="lightbox-img" class="lightbox-img" src="" alt="" />
+  <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+
+<nav>
+  <button id="btn-prev" onclick="navigate(-1)" title="Anterior">&#8592; Anterior</button>
+  <div class="dot-nav" id="dot-nav"></div>
+  <span id="slide-counter">1 / 16</span>
+  <button id="btn-next" onclick="navigate(1)" title="Siguiente">Siguiente &#8594;</button>
+</nav>
+
+<script>
+  const totalSlides = 16;
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const progress = document.getElementById('progress');
+  const counter  = document.getElementById('slide-counter');
+  const dotNav   = document.getElementById('dot-nav');
+  const btnPrev  = document.getElementById('btn-prev');
+  const btnNext  = document.getElementById('btn-next');
+
+  // Lightbox elements
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const lightboxCaption = document.getElementById('lightbox-caption');
+
+  for (let i = 0; i < totalSlides; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotNav.appendChild(d);
+  }
+
+  function updateUI() {
+    const pct = current / (totalSlides - 1);
+    progress.style.transform = 'scaleX(' + pct + ')';
+    counter.textContent = (current + 1) + ' / ' + totalSlides;
+    btnPrev.disabled = current === 0;
+    btnNext.disabled = current === totalSlides - 1;
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= totalSlides) return;
+    const prev = current;
+    current = index;
+    slides[prev].classList.remove('active');
+    slides[prev].classList.add('exit-left');
+    setTimeout(() => slides[prev].classList.remove('exit-left'), 400);
+    slides[current].classList.add('active');
+    updateUI();
+  }
+
+  function navigate(dir) { goTo(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (lightbox.classList.contains('active')) {
+      if (e.key === 'Escape') closeLightbox();
+      return;
+    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      navigate(1);
+    }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp') {
+      navigate(-1);
+    }
+  });
+
+  // Lightbox click-to-zoom
+  document.querySelectorAll('.screenshot').forEach(img => {
+    img.addEventListener('click', e => {
+      e.stopPropagation();
+      lightboxImg.src = img.src;
+      lightboxCaption.textContent = img.alt || 'Captura de pantalla';
+      lightbox.classList.add('active');
+    });
+  });
+
+  function closeLightbox(e) {
+    if (e && e.target === lightboxImg) return;
+    lightbox.classList.remove('active');
+  }
+
+  updateUI();
+</script>
+</body>
+</html>

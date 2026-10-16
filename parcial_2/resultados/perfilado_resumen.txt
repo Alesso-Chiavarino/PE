@@ -1,50 +1,50 @@
 PERFILADO DE LA IMPLEMENTACION INICIAL
-         593186 function calls in 1.268 seconds
+         344111 function calls in 2.575 seconds
 
    Ordered by: cumulative time
    List reduced from 22 to 15 due to restriction <15>
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-        1    0.535    0.535    1.270    1.270 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:180(detectar_inicial)
-        1    0.647    0.647    0.647    0.647 /Users/alesso/dev/ubp/PE/parcial_2/algoritmos_ordenamiento.py:8(ordenar_burbuja)
-     5000    0.008    0.000    0.082    0.000 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:33(_calcular_perfil)
-    10000    0.003    0.000    0.072    0.000 /Users/alesso/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/statistics.py:490(fmean)
-    10000    0.020    0.000    0.067    0.000 {built-in method math.fsum}
-   259066    0.025    0.000    0.047    0.000 /Users/alesso/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/statistics.py:505(count)
-   259066    0.022    0.000    0.022    0.000 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:36(<genexpr>)
-     5000    0.001    0.000    0.004    0.000 {built-in method builtins.sum}
-     5003    0.003    0.000    0.003    0.000 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:234(<genexpr>)
-    20007    0.002    0.000    0.002    0.000 {built-in method builtins.len}
-     5009    0.001    0.000    0.001    0.000 {method 'append' of 'list' objects}
+        1    1.357    1.357    2.575    2.575 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:180(detectar_inicial)
+        1    1.007    1.007    1.007    1.007 /home/franco/Repositories/PE/PE/parcial_2/algoritmos_ordenamiento.py:8(ordenar_burbuja)
+     5000    0.028    0.000    0.196    0.000 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:33(_calcular_perfil)
+    10000    0.019    0.000    0.161    0.000 /home/franco/.local/share/mise/installs/python/3.14.7/lib/python3.14/statistics.py:181(fmean)
+    10000    0.077    0.000    0.137    0.000 {built-in method math.fsum}
+   259066    0.060    0.000    0.060    0.000 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:36(<genexpr>)
+     5000    0.003    0.000    0.011    0.000 {built-in method builtins.sum}
+     5003    0.008    0.000    0.008    0.000 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:234(<genexpr>)
+    20007    0.006    0.000    0.006    0.000 {built-in method builtins.len}
+     5000    0.005    0.000    0.005    0.000 <string>:2(__init__)
+     5000    0.002    0.000    0.002    0.000 {method 'add' of 'set' objects}
+     5000    0.001    0.000    0.001    0.000 {built-in method math.sqrt}
      5000    0.001    0.000    0.001    0.000 {built-in method builtins.max}
-     5000    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}
-     5000    0.000    0.000    0.000    0.000 {built-in method math.sqrt}
-        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+     5009    0.001    0.000    0.001    0.000 {method 'append' of 'list' objects}
+     5000    0.001    0.000    0.001    0.000 {built-in method builtins.next}
 
 
 
 PERFILADO DEL ALGORITMO OPTIMIZADO
-         91292 function calls (84646 primitive calls) in 0.020 seconds
+         86384 function calls (79738 primitive calls) in 0.051 seconds
 
    Ordered by: cumulative time
    List reduced from 34 to 15 due to restriction <15>
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-        1    0.000    0.000    0.020    0.020 /Users/alesso/dev/ubp/PE/parcial_2/perfilado.py:55(optimizada)
-        1    0.000    0.000    0.020    0.020 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:316(detectar_optimizado)
-      101    0.001    0.000    0.017    0.000 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:273(_detectar_grupo)
-     5000    0.007    0.000    0.010    0.000 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:103(procesar)
- 6747/101    0.004    0.000    0.005    0.000 /Users/alesso/dev/ubp/PE/parcial_2/algoritmos_ordenamiento.py:31(ordenar_quicksort)
-     5000    0.001    0.000    0.002    0.000 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:64(obtener)
-      101    0.000    0.000    0.002    0.000 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:73(_calcular)
-      101    0.000    0.000    0.002    0.000 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:33(_calcular_perfil)
-      202    0.000    0.000    0.002    0.000 /Users/alesso/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/statistics.py:490(fmean)
-      202    0.000    0.000    0.001    0.000 {built-in method math.fsum}
-    15000    0.001    0.000    0.001    0.000 {method 'append' of 'collections.deque' objects}
-    20278    0.001    0.000    0.001    0.000 {built-in method builtins.len}
-    14465    0.001    0.000    0.001    0.000 {method 'popleft' of 'collections.deque' objects}
-     5101    0.001    0.000    0.001    0.000 /Users/alesso/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/statistics.py:505(count)
-        1    0.000    0.000    0.001    0.001 /Users/alesso/dev/ubp/PE/parcial_2/detectores.py:24(_agrupar_por_usuario)
+        1    0.000    0.000    0.051    0.051 /home/franco/Repositories/PE/PE/parcial_2/perfilado.py:55(optimizada)
+        1    0.001    0.001    0.051    0.051 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:316(detectar_optimizado)
+      101    0.004    0.000    0.043    0.000 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:273(_detectar_grupo)
+     5000    0.019    0.000    0.025    0.000 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:103(procesar)
+ 6747/101    0.011    0.000    0.012    0.000 /home/franco/Repositories/PE/PE/parcial_2/algoritmos_ordenamiento.py:31(ordenar_quicksort)
+     5000    0.001    0.000    0.005    0.000 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:64(obtener)
+      101    0.000    0.000    0.004    0.000 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:73(_calcular)
+      101    0.001    0.000    0.004    0.000 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:33(_calcular_perfil)
+      202    0.000    0.000    0.003    0.000 /home/franco/.local/share/mise/installs/python/3.14.7/lib/python3.14/statistics.py:181(fmean)
+    20278    0.003    0.000    0.003    0.000 {built-in method builtins.len}
+      202    0.001    0.000    0.002    0.000 {built-in method math.fsum}
+    15000    0.002    0.000    0.002    0.000 {method 'append' of 'collections.deque' objects}
+    14465    0.002    0.000    0.002    0.000 {method 'popleft' of 'collections.deque' objects}
+        1    0.001    0.001    0.002    0.002 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:24(_agrupar_por_usuario)
+     5101    0.001    0.000    0.001    0.000 /home/franco/Repositories/PE/PE/parcial_2/detectores.py:36(<genexpr>)
 
 
 

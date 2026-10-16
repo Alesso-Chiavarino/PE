@@ -1,0 +1,8 @@
+transaccion_id,usuario,tipo,detalle
+99989,USR-ANOMALO,MONTO_ALTO,"Monto $8000.00, limite $7383.55"
+99993,USR-ANOMALO,RAFAGA,5 operaciones en 60 segundos
+99994,USR-ANOMALO,RAFAGA,6 operaciones en 60 segundos
+99995,USR-ANOMALO,RAFAGA,7 operaciones en 60 segundos
+99996,USR-ANOMALO,RAFAGA,5 operaciones en 60 segundos
+99998,USR-ANOMALO,OPERACION_REPETIDA,3 operaciones iguales en 5 minutos
+100000,USR-ANOMALO,UBICACIONES_SIMULTANEAS,"Actividad cercana desde Cordoba, Madrid"
