@@ -84,6 +84,19 @@
       <aside class="notes">La profesora pide que cada control tenga herramienta, comando, reporte y criterio. Nuestra matriz cumple las cuatro partes y el workflow las ejecuta.</aside>
     </section>
 
+    <section class="slide" data-title="Ubicación de los reportes">
+      <div class="eyebrow">Evidencia descargable</div><h2>¿Dónde está el resultado de cada control?</h2>
+      <div class="artifact-grid">
+        <article><div class="artifact-name">reporte-complejidad</div><b>Radon</b><p><code>complejidad.json</code></p><small>91 bloques, promedio, máxima y rango de cada función.</small></article>
+        <article><div class="artifact-name">reportes-pruebas</div><b>pytest + pytest-cov</b><p><code>pytest.xml</code><br><code>coverage.xml</code></p><small>Pruebas ejecutadas, fallos y cobertura por archivo.</small></article>
+        <article class="featured"><div class="artifact-name">reportes-rendimiento</div><b>Benchmark + CPU + memoria</b><p><code>rendimiento.json</code><br><code>memoria.json</code><br><code>perfilado*.prof</code> y resumen</p><small>Cuánto tarda, dónde consume CPU y cuánta memoria utiliza.</small></article>
+        <article><div class="artifact-name">reportes-seguridad</div><b>Bandit + pip-audit + secretos</b><p><code>bandit.json</code><br><code>pip-audit.json</code><br><code>.secrets.baseline</code></p><small>Código inseguro, dependencias vulnerables y secretos nuevos.</small></article>
+        <article><div class="artifact-name">sitio-sphinx</div><b>Documentación</b><p><code>index.html</code> y sitio completo</p><small>Resultado HTML que también se publica en GitHub Pages.</small></article>
+      </div>
+      <div class="log-strip"><b>Resultados en los logs:</b><span><strong>Ruff</strong> · análisis estático</span><span><strong>mypy</strong> · tipado</span><span>Un paso verde significa que no encontró errores bloqueantes.</span></div>
+      <aside class="notes">Los artefactos se descargan desde el Summary de una ejecución. Benchmark responde cuánto tarda; cProfile indica en qué funciones se consume el tiempo; tracemalloc mide el pico de memoria.</aside>
+    </section>
+
     <section class="slide" data-title="Pruebas, cobertura y tipado">
       <div class="eyebrow">Controles funcionales</div><h2>Correctitud antes de rendimiento</h2>
       <div class="three-cards"><article><div class="num">15/15</div><h3>pytest</h3><p>Valida comportamiento esperado, archivos, detectores y monitoreo.</p></article><article><div class="num">93,82 %</div><h3>pytest-cov</h3><p>Supera el umbral bloqueante del 90 % y genera XML.</p></article><article><div class="num">0</div><h3>mypy</h3><p>Sin inconsistencias bloqueantes en contratos y tipos.</p></article></div>
@@ -119,7 +132,7 @@
     <section class="slide" data-title="Dependencias reproducibles">
       <div class="eyebrow">Dependencias</div><h2>Versiones fijadas y actualizaciones controladas</h2>
       <div class="split visual-right">
-        <div><ul class="check-list"><li><code>requirements-lock.txt</code> fija versiones exactas.</li><li><b>pip-audit</b> revisa vulnerabilidades conocidas.</li><li><b>Dependabot</b> propone actualizaciones mediante pull requests.</li><li>Cada propuesta vuelve a pasar los mismos controles.</li></ul><p class="policy"><b>Ejemplo real:</b> actualizaciones compatibles aprobaron; una actualización de <code>docutils</code> falló y quedó sin integrar.</p></div>
+        <div><ul class="check-list"><li><code>requirements-lock.txt</code> fija versiones exactas.</li><li><b>pip-audit</b> revisa vulnerabilidades conocidas.</li><li><b>Dependabot</b> propone actualizaciones mediante pull requests.</li><li>Cada propuesta vuelve a pasar los mismos controles.</li></ul></div>
         <figure><img src="assets/07-dependabot.png" alt="Ejecuciones de Dependabot"><figcaption>Automatizar la propuesta no significa aprobarla automáticamente.</figcaption></figure>
       </div>
       <aside class="notes">Dependabot no modifica master por su cuenta. Abre una propuesta, el CI la prueba y recién después decidimos si integrarla.</aside>
@@ -130,6 +143,33 @@
       <div class="stage-list"><div><span>1</span><b>Integración</b><small>push / PR</small></div><div><span>2</span><b>Preparación</b><small>Python + dependencias fijadas</small></div><div><span>3</span><b>Calidad estática</b><small>Ruff · mypy · Radon</small></div><div><span>4</span><b>Pruebas</b><small>pytest · cobertura</small></div><div><span>5</span><b>Seguridad y docs</b><small>Bandit · audit · Sphinx</small></div><div><span>6</span><b>Eficiencia</b><small>benchmark · CPU · memoria</small></div><div><span>7</span><b>Resultado</b><small>estado + artefactos</small></div></div>
       <p class="muted center">Los cinco trabajos independientes se ejecutan en paralelo para reducir el tiempo total.</p>
       <aside class="notes">La organización sigue el orden propuesto por la profesora. En GitHub se ve agrupada en cinco trabajos porque varias herramientas relacionadas comparten entorno.</aside>
+    </section>
+
+    <section class="slide" data-title="Qué hace cada etapa">
+      <div class="eyebrow">Cinco trabajos del CI</div><h2>Cada etapa responde una pregunta diferente</h2>
+      <div class="phase-grid">
+        <article><span>01</span><h3>Calidad estática</h3><p>¿El código está bien escrito y es mantenible?</p><b>Ruff · mypy · Radon</b><small>Cero errores y complejidad dentro del límite.</small></article>
+        <article><span>02</span><h3>Pruebas y cobertura</h3><p>¿El sistema funciona y cuánto código probamos?</p><b>pytest · pytest-cov</b><small>15 pruebas aprobadas y cobertura mínima del 90 %.</small></article>
+        <article><span>03</span><h3>Seguridad</h3><p>¿Hay riesgos en código, paquetes o secretos?</p><b>Bandit · pip-audit · detect-secrets</b><small>Los hallazgos bloqueantes impiden integrar.</small></article>
+        <article><span>04</span><h3>Documentación</h3><p>¿El sitio se construye y sus enlaces funcionan?</p><b>Sphinx · linkcheck</b><small>Construcción sin advertencias obligatorias.</small></article>
+        <article><span>05</span><h3>Rendimiento y memoria</h3><p>¿El sistema sigue siendo eficiente?</p><b>Benchmark · cProfile · tracemalloc</b><small>Sin regresión significativa y máximo 25 MiB.</small></article>
+      </div>
+      <div class="phase-order"><b>Ejecución:</b> las primeras cuatro comienzan en paralelo; rendimiento espera que calidad y pruebas hayan aprobado.</div>
+      <aside class="notes">Calidad revisa cómo está escrito; pruebas comprueba que funcione; seguridad busca riesgos; documentación valida el sitio; rendimiento controla velocidad, CPU y memoria.</aside>
+    </section>
+
+    <section class="slide" data-title="Nuestras condiciones de éxito">
+      <div class="eyebrow">Criterios de aprobación</div><h2>Nuestras condiciones de éxito</h2>
+      <p class="success-intro">Cada etapa observa un riesgo distinto del proyecto y tiene una regla objetiva para decidir si el cambio puede avanzar.</p>
+      <div class="success-grid">
+        <article><h3>Calidad estática</h3><p>Examina el código sin ejecutarlo: errores, tipos y funciones difíciles de mantener.</p><ul><li><b>Ruff y mypy:</b> cero errores.</li><li><b>Radon:</b> máxima ≤ 20 y promedio ≤ 8.</li></ul><small>Resultado: máxima 18 · promedio 2,56</small></article>
+        <article><h3>Pruebas y cobertura</h3><p>Ejecuta casos esperados y mide qué porcentaje del código fue recorrido.</p><ul><li>Las 15 pruebas deben aprobar.</li><li>Cobertura ≥ 90 %.</li></ul><small>Resultado: 15/15 · cobertura 94,1 %</small></article>
+        <article><h3>Seguridad</h3><p>Busca patrones inseguros, paquetes vulnerables y credenciales accidentales.</p><ul><li>Sin hallazgos medios o altos.</li><li>Sin vulnerabilidades ni secretos nuevos.</li></ul><small>Bandit · pip-audit · detect-secrets</small></article>
+        <article><h3>Documentación</h3><p>Convierte los archivos RST en un sitio y comprueba que sus enlaces funcionen.</p><ul><li>Sphinx construye sin errores.</li><li>Enlaces válidos.</li></ul><small>Resultado: sitio y linkcheck aprobados</small></article>
+        <article><h3>Rendimiento y memoria</h3><p>Mide cuánto tarda, dónde consume CPU y cuál es su pico de memoria.</p><ul><li>Sin regresión superior al 25 %.</li><li>Mismas alertas y memoria ≤ 25 MiB.</li></ul><small>Resultado: memoria aproximada 8,35 MiB</small></article>
+      </div>
+      <div class="final-gate"><b>Condición final:</b> los cinco checks deben quedar verdes para integrar el cambio en <code>master</code>.</div>
+      <aside class="notes">No usamos una única condición para todo. Cada control tiene su propio criterio. El resultado final solamente es exitoso cuando los cinco trabajos obligatorios quedan verdes.</aside>
     </section>
 
     <section class="slide" data-title="3.1 Fallos y bloqueo">
@@ -169,7 +209,7 @@
   <footer class="controls">
     <button id="prevBtn" aria-label="Diapositiva anterior">←</button>
     <div class="progress"><span id="progressBar"></span></div>
-    <span id="counter">1 / 16</span>
+    <span id="counter">1 / 19</span>
     <button id="nextBtn" aria-label="Diapositiva siguiente">→</button>
   </footer>
   <script src="app.js"></script>
