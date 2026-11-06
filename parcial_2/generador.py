@@ -3,7 +3,6 @@ from collections.abc import Iterator
 
 from modelos import Transaccion
 
-
 UBICACIONES = ("Cordoba", "Rosario", "Mendoza", "Buenos Aires")
 COMERCIOS = ("Supermercado", "Farmacia", "Combustible", "Restaurante", "Tienda")
 CANTIDAD_ANOMALIAS = 12

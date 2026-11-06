@@ -1,6 +1,5 @@
 from modelos import Transaccion
 
-
 # ==============================================================================
 # 1. ANALISIS DE COMPLEJIDAD Y SELECCION DE ALGORITMOS: BURBUJA vs QUICKSORT
 # ==============================================================================

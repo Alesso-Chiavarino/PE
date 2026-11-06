@@ -1,4 +1,4 @@
-# Segundo parcial - Programacion Eficiente
+# Tercer parcial - Programación Eficiente
 
 Sistema en Python que simula transacciones y detecta cuatro comportamientos
 sospechosos:
@@ -8,9 +8,20 @@ sospechosos:
 - operaciones iguales repetidas;
 - actividad casi simultanea desde ubicaciones diferentes.
 
-La segunda version conserva las comparaciones del primer parcial y agrega
-refactorizacion, procesamiento de archivos CSV grandes, pytest, analisis de
-calidad y documentacion automatica.
+La tercera versión conserva las mejoras del segundo parcial y agrega integración
+continua, controles automáticos de calidad y seguridad, políticas de aprobación,
+reportes reproducibles y documentación técnica centralizada con Sphinx.
+
+## Qué agrega el tercer parcial
+
+- GitHub Actions ante cada push y pull request;
+- Ruff y mypy para calidad estática y contratos de tipos;
+- Radon con límites de complejidad;
+- pytest y cobertura mínima del 90 por ciento;
+- Bandit, pip-audit y detect-secrets para seguridad;
+- benchmark relativo, profiling de CPU y límite de memoria;
+- construcción y validación automática de la documentación Sphinx;
+- artefactos JSON, XML, HTML y archivos de profiling descargables.
 
 ## Como ejecutarlo
 
@@ -33,16 +44,39 @@ python -m pytest
 La cantidad se puede cambiar en los comandos `demo`, `benchmark`, `perfilado`
 y `generar-archivo` mediante `--transacciones`.
 
-## Herramientas del segundo parcial
+## Controles del tercer parcial
+
+Los mismos controles del pipeline se pueden ejecutar localmente:
+
+```bash
+python -m ruff check .
+python -m mypy algoritmos_ordenamiento.py archivos.py configuracion.py \
+  detectores.py generador.py main.py medicion.py modelos.py monitoreo.py \
+  perfilado.py interfaz tests scripts
+python -m scripts.verificar_complejidad
+python -m pytest --cov --cov-fail-under=90
+python -m bandit -r . -x ./.venv,./tests,./docs,./presentacion,./resultados -ll
+python -m pip_audit -r requirements.txt --cache-dir reportes/.pip-audit-cache
+detect-secrets scan --all-files --baseline .secrets.baseline
+python -m sphinx -W --keep-going -b html docs docs/_build/html
+python -m scripts.verificar_rendimiento
+python -m scripts.verificar_memoria
+```
+
+Los criterios de rechazo y la resolución de fallos están documentados en
+`docs/mantenimiento.rst`. Los reportes se generan dentro de `reportes/` y el CI
+los publica como artefactos de GitHub Actions.
+
+## Herramientas heredadas del segundo parcial
 
 Se eligieron herramientas presentes en el material de clase y simples de
 ejecutar:
 
 ```bash
-python -m pip install -r requirements-dev.txt
+python -m pip install -r requirements-lock.txt
 python -m pytest --cov=archivos --cov=configuracion --cov=detectores \
   --cov=generador --cov=algoritmos_ordenamiento --cov-report=term-missing
-python -m flake8 .
+python -m ruff check .
 python main.py perfilado --transacciones 5000
 python -m snakeviz resultados/perfilado_optimizado.prof
 python -m sphinx -b html docs docs/_build/html

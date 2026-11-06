@@ -1,14 +1,21 @@
 Detector de transacciones sospechosas
 =====================================
 
-La segunda version procesa datos en memoria o desde archivos CSV grandes. El
-procesamiento por archivos utiliza generadores, buffers y lotes para limitar el
-consumo de memoria.
+Esta documentación centraliza la información funcional, técnica y operativa del
+proyecto. La tercera versión mantiene el procesamiento eficiente del segundo
+parcial y automatiza pruebas, calidad, seguridad, documentación y mediciones de
+rendimiento mediante integración continua.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contenido
 
    uso
+   arquitectura
+   diseno_tecnico
+   pruebas
+   rendimiento
+   seguridad
+   mantenimiento
    refactorizacion
    api

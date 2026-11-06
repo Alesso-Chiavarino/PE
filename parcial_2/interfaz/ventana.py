@@ -14,7 +14,6 @@ from generador import generar_transacciones
 from medicion import ResultadoMedicion, ejecutar_comparacion, guardar_csv
 from modelos import Alerta
 
-
 COLOR_FONDO = "#f2f5f7"
 COLOR_PANEL = "#ffffff"
 COLOR_TEXTO = "#17202a"
@@ -358,7 +357,7 @@ class VentanaDetector:
             try:
                 resultado = tarea()
             except Exception as error:
-                self.raiz.after(0, lambda texto=str(error): self._mostrar_error(texto))
+                self.raiz.after(0, self._mostrar_error, str(error))
             else:
                 self.raiz.after(0, lambda: completar(resultado))
 

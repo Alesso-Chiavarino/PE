@@ -13,7 +13,6 @@ from configuracion import CONFIGURACION_PREDETERMINADA
 from detectores import EstadoDeteccionUsuario
 from modelos import Alerta, PerfilUsuario, Transaccion
 
-
 CAMPOS_TRANSACCION = (
     "id",
     "usuario",

@@ -5,3 +5,6 @@ __pycache__/
 htmlcov/
 docs/_build/
 datos/*.csv
+reportes/
+.mypy_cache/
+.ruff_cache/

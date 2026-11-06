@@ -12,7 +12,6 @@ from algoritmos_ordenamiento import ordenar_burbuja, ordenar_quicksort
 from configuracion import CONFIGURACION_PREDETERMINADA, ConfiguracionDeteccion
 from modelos import Alerta, PerfilUsuario, Transaccion
 
-
 VENTANA_RAFAGA = CONFIGURACION_PREDETERMINADA.ventana_rafaga
 MINIMO_RAFAGA = CONFIGURACION_PREDETERMINADA.minimo_rafaga
 VENTANA_REPETICION = CONFIGURACION_PREDETERMINADA.ventana_repeticion
