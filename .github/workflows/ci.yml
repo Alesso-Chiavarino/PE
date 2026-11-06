@@ -89,7 +89,7 @@ jobs:
       - name: Detectar secretos nuevos
         run: |
           detect-secrets scan --all-files --baseline .secrets.baseline
-          git diff --exit-code .secrets.baseline
+          git diff --exit-code --ignore-matching-lines='"generated_at":' .secrets.baseline
       - uses: actions/upload-artifact@v4
         if: always()
         with:

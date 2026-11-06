@@ -29,6 +29,7 @@ Controles equivalentes al CI
    python -m bandit -r . -x ./.venv,./tests,./docs,./presentacion,./resultados -ll
    python -m pip_audit -r requirements.txt --cache-dir reportes/.pip-audit-cache
    detect-secrets scan --all-files --baseline .secrets.baseline
+   git diff --exit-code --ignore-matching-lines='"generated_at":' .secrets.baseline
    python -m sphinx -W --keep-going -b html docs docs/_build/html
    python -m scripts.verificar_rendimiento
    python -m scripts.verificar_memoria
