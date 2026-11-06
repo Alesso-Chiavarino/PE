@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Presentación del tercer parcial de Programación Eficiente">
+  <title>Parcial 3 · Calidad e integración continua</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button id="menuBtn" class="icon-btn" aria-label="Abrir índice">☰</button>
+    <div class="brand"><span>PE</span> Tercer parcial</div>
+    <div class="top-actions">
+      <button id="notesBtn" class="text-btn" aria-pressed="false">Guion</button>
+      <button id="fullBtn" class="icon-btn" aria-label="Pantalla completa">⛶</button>
+    </div>
+  </header>
+
+  <aside id="sidebar" class="sidebar" aria-label="Índice de diapositivas">
+    <div class="side-head"><strong>Contenido</strong><button id="closeBtn" class="icon-btn">×</button></div>
+    <nav id="toc"></nav>
+    <a class="docs-link" href="https://alesso-chiavarino.github.io/PE/" target="_blank" rel="noreferrer">Ver documentación publicada ↗</a>
+  </aside>
+  <div id="scrim" class="scrim"></div>
+
+  <main id="deck" class="deck">
+    <section class="slide cover" data-title="Portada">
+      <div class="eyebrow">Programación Eficiente · Parcial 3</div>
+      <h1>Calidad, seguridad<br>e integración continua</h1>
+      <p class="lead">Evolución del sistema de detección de fraude: controles automáticos, documentación compartida y criterios verificables para integrar código.</p>
+      <div class="cover-meta"><span>Python</span><span>GitHub Actions</span><span>Sphinx</span><span>pytest</span></div>
+      <div class="hero-flow" aria-label="Flujo general"><b>Código</b><i>→</i><b>Controles</b><i>→</i><b>Evidencia</b><i>→</i><b>Integración</b></div>
+      <aside class="notes">Presentamos cómo llevamos el proyecto del segundo parcial a un proceso reproducible. La idea central es que cada cambio se comprueba antes de llegar a la rama principal.</aside>
+    </section>
+
+    <section class="slide" data-title="Objetivo y alcance">
+      <div class="eyebrow">Introducción</div><h2>Objetivo del tercer parcial</h2>
+      <div class="split">
+        <div><p class="big-copy">Convertir las buenas prácticas del proyecto en <em>reglas automáticas y demostrables</em>.</p>
+          <ul class="check-list"><li>Centralizar documentación funcional, técnica y operativa.</li><li>Ejecutar controles en cada <code>push</code> y <code>pull request</code>.</li><li>Impedir integraciones que incumplan los umbrales acordados.</li><li>Guardar reportes y artefactos como evidencia.</li></ul></div>
+        <div class="metric-stack"><div><strong>5</strong><span>trabajos de CI</span></div><div><strong>15</strong><span>pruebas aprobadas</span></div><div><strong>93,82 %</strong><span>de cobertura</span></div></div>
+      </div>
+      <aside class="notes">No agregamos una nueva función de negocio. Mejoramos la forma de desarrollar, verificar, documentar y mantener el sistema.</aside>
+    </section>
+
+    <section class="slide" data-title="1. Documentación externa">
+      <div class="eyebrow">1 · Documentación externa del proyecto</div><h2>Una fuente compartida y siempre actualizada</h2>
+      <div class="split visual-right">
+        <div><h3>Elección: Sphinx + GitHub Pages</h3><p>La documentación vive en Git, se revisa con el código y se publica automáticamente.</p>
+          <ul><li>Descripción funcional, alcance y requisitos.</li><li>Arquitectura, módulos y responsabilidades.</li><li>Instalación, ejecución y configuración.</li><li>Diseño técnico, pruebas, rendimiento y seguridad.</li><li>Mantenimiento y comandos equivalentes al CI.</li></ul>
+          <a class="cta" href="https://alesso-chiavarino.github.io/PE/" target="_blank" rel="noreferrer">Abrir documentación ↗</a></div>
+        <figure><img src="assets/08-pages-publicado.png" alt="Workflow de publicación de documentación aprobado"><figcaption>GitHub Pages se despliega desde <code>master</code>.</figcaption></figure>
+      </div>
+      <aside class="notes">Elegimos Sphinx porque ya estaba integrado en Python y permite convertir archivos RST en un sitio navegable. GitHub Pages brinda el lugar compartido que pide el enunciado.</aside>
+    </section>
+
+    <section class="slide" data-title="2. Integración continua">
+      <div class="eyebrow">2 · Integración continua</div><h2>GitHub Actions ejecuta el control automáticamente</h2>
+      <div class="pipeline">
+        <div><span>01</span><b>Evento</b><small>push o pull request</small></div><i>→</i>
+        <div><span>02</span><b>Entorno</b><small>Python + lockfile</small></div><i>→</i>
+        <div><span>03</span><b>Controles</b><small>cinco trabajos</small></div><i>→</i>
+        <div><span>04</span><b>Decisión</b><small>aprobar o bloquear</small></div>
+      </div>
+      <div class="two-cols compact"><div><h3>¿Por qué esta plataforma?</h3><p>Está integrada al repositorio, deja historial, comentarios y artefactos. No requiere mantener servidores adicionales.</p></div><div><h3>¿Dónde está configurada?</h3><p><code>.github/workflows/ci.yml</code> define los eventos, herramientas, comandos y condiciones de aprobación.</p></div></div>
+      <aside class="notes">El workflow se dispara solo. Así, el resultado no depende de que una persona recuerde ejecutar cada herramienta.</aside>
+    </section>
+
+    <section class="slide" data-title="2.1 Plataforma y flujo">
+      <div class="eyebrow">2.1 · Plataforma</div><h2>Trabajo con rama y revisión antes de integrar</h2>
+      <div class="split visual-right">
+        <ol class="steps"><li><b>Creamos la rama <code>parcial3</code></b><span>El segundo parcial quedó preservado.</span></li><li><b>Implementamos y validamos localmente</b><span>Herramientas y umbrales reproducibles.</span></li><li><b>Abrimos el pull request</b><span>GitHub ejecutó todos los controles.</span></li><li><b>Integramos en <code>master</code></b><span>Solo después de obtener resultados verdes.</span></li></ol>
+        <figure><img src="assets/01-pull-request.png" alt="Pull request del tercer parcial"><figcaption>El pull request reúne cambios, commits y verificaciones.</figcaption></figure>
+      </div>
+      <aside class="notes">La rama parcial3 nos permitió trabajar sin alterar directamente master. El pull request funcionó como punto de revisión y evidencia.</aside>
+    </section>
+
+    <section class="slide" data-title="2.2 Matriz de controles">
+      <div class="eyebrow">2.2 · Matriz de controles</div><h2>Una herramienta y un criterio para cada riesgo</h2>
+      <div class="control-grid">
+        <article><b>Pruebas</b><span>pytest</span><small>15/15 deben aprobar</small></article><article><b>Benchmark</b><span>script + pytest</span><small>sin regresión significativa</small></article><article><b>CPU</b><span>cProfile</span><small>reporte descargable</small></article><article><b>Análisis estático</b><span>Ruff</span><small>cero errores</small></article><article><b>Cobertura</b><span>pytest-cov</span><small>mínimo 90 %</small></article><article><b>Complejidad</b><span>Radon</span><small>máximo 20</small></article><article><b>Memoria</b><span>tracemalloc</span><small>máximo 25 MiB</small></article><article><b>Seguridad</b><span>Bandit + pip-audit</span><small>bloquea media/alta</small></article><article><b>Tipado</b><span>mypy</span><small>cero errores</small></article><article><b>Dependencias</b><span>lock + Dependabot</span><small>versiones fijadas</small></article><article><b>Documentación</b><span>Sphinx</span><small>build y enlaces válidos</small></article><article><b>Secretos</b><span>detect-secrets</span><small>sin secretos nuevos</small></article>
+      </div>
+      <aside class="notes">La profesora pide que cada control tenga herramienta, comando, reporte y criterio. Nuestra matriz cumple las cuatro partes y el workflow las ejecuta.</aside>
+    </section>
+
+    <section class="slide" data-title="Ubicación de los reportes">
+      <div class="eyebrow">Evidencia descargable</div><h2>¿Dónde está el resultado de cada control?</h2>
+      <div class="artifact-grid">
+        <article><div class="artifact-name">reporte-complejidad</div><b>Radon</b><p><code>complejidad.json</code></p><small>91 bloques, promedio, máxima y rango de cada función.</small></article>
+        <article><div class="artifact-name">reportes-pruebas</div><b>pytest + pytest-cov</b><p><code>pytest.xml</code><br><code>coverage.xml</code></p><small>Pruebas ejecutadas, fallos y cobertura por archivo.</small></article>
+        <article class="featured"><div class="artifact-name">reportes-rendimiento</div><b>Benchmark + CPU + memoria</b><p><code>rendimiento.json</code><br><code>memoria.json</code><br><code>perfilado*.prof</code> y resumen</p><small>Cuánto tarda, dónde consume CPU y cuánta memoria utiliza.</small></article>
+        <article><div class="artifact-name">reportes-seguridad</div><b>Bandit + pip-audit + secretos</b><p><code>bandit.json</code><br><code>pip-audit.json</code><br><code>.secrets.baseline</code></p><small>Código inseguro, dependencias vulnerables y secretos nuevos.</small></article>
+        <article><div class="artifact-name">sitio-sphinx</div><b>Documentación</b><p><code>index.html</code> y sitio completo</p><small>Resultado HTML que también se publica en GitHub Pages.</small></article>
+      </div>
+      <div class="log-strip"><b>Resultados en los logs:</b><span><strong>Ruff</strong> · análisis estático</span><span><strong>mypy</strong> · tipado</span><span>Un paso verde significa que no encontró errores bloqueantes.</span></div>
+      <aside class="notes">Los artefactos se descargan desde el Summary de una ejecución. Benchmark responde cuánto tarda; cProfile indica en qué funciones se consume el tiempo; tracemalloc mide el pico de memoria.</aside>
+    </section>
+
+    <section class="slide" data-title="Pruebas, cobertura y tipado">
+      <div class="eyebrow">Controles funcionales</div><h2>Correctitud antes de rendimiento</h2>
+      <div class="three-cards"><article><div class="num">15/15</div><h3>pytest</h3><p>Valida comportamiento esperado, archivos, detectores y monitoreo.</p></article><article><div class="num">93,82 %</div><h3>pytest-cov</h3><p>Supera el umbral bloqueante del 90 % y genera XML.</p></article><article><div class="num">0</div><h3>mypy</h3><p>Sin inconsistencias bloqueantes en contratos y tipos.</p></article></div>
+      <div class="code-line"><code>pytest --cov=. --cov-fail-under=90 --cov-report=xml</code></div>
+      <aside class="notes">Las pruebas son el primer criterio determinista: si una falla, no se integra. La cobertura no demuestra calidad por sí sola, pero evita dejar grandes zonas sin ejecutar.</aside>
+    </section>
+
+    <section class="slide" data-title="Calidad y complejidad">
+      <div class="eyebrow">Calidad estática</div><h2>Ruff, mypy y Radon detectan problemas temprano</h2>
+      <div class="split">
+        <div class="tool-list"><div><b>Ruff</b><span>Errores, estilo, imports y construcciones problemáticas.</span></div><div><b>mypy</b><span>Contratos de tipos antes de ejecutar el programa.</span></div><div><b>Radon</b><span>Complejidad ciclomática y funciones difíciles de mantener.</span></div></div>
+        <div class="gauge"><div class="gauge-num">18</div><div class="gauge-label">complejidad máxima</div><div class="bar"><span style="width:90%"></span></div><p>Límite definido: <b>20</b><br>Promedio medido: <b>2,56</b></p></div>
+      </div>
+      <aside class="notes">El máximo 18 está cerca del límite, pero aprobado. El promedio 2,56 indica que la mayoría de las funciones es simple. El umbral hace visible cuándo conviene refactorizar.</aside>
+    </section>
+
+    <section class="slide" data-title="Rendimiento y memoria">
+      <div class="eyebrow">Eficiencia medible</div><h2>Benchmark, profiling y consumo de memoria</h2>
+      <div class="split">
+        <div class="comparison"><div class="before"><span>Versión inicial</span><b>≈ 70×</b><small>más lenta en la prueba representativa</small></div><div class="after"><span>Versión optimizada</span><b>8,35 MiB</b><small>para 20.000 transacciones en streaming</small></div></div>
+        <div><h3>Qué medimos</h3><ul><li><b>Benchmark:</b> tiempo de una operación representativa.</li><li><b>cProfile:</b> funciones que concentran CPU.</li><li><b>tracemalloc:</b> memoria máxima durante el procesamiento.</li><li><b>Umbral:</b> máximo 25 MiB en el escenario fijado.</li></ul><p class="muted">Los resultados se guardan como artefactos descargables del pipeline.</p></div>
+      </div>
+      <aside class="notes">Para que la comparación sea reproducible fijamos cantidad de transacciones y tolerancias. Rendimiento y memoria pueden variar por entorno, por eso no se tratan igual que una prueba funcional.</aside>
+    </section>
+
+    <section class="slide" data-title="Seguridad">
+      <div class="eyebrow">Requisitos de seguridad</div><h2>Tres superficies, tres controles complementarios</h2>
+      <div class="three-cards"><article><div class="security-icon">⌁</div><h3>Código fuente</h3><p><b>Bandit</b> busca patrones inseguros. Bloqueamos severidad media o alta.</p></article><article><div class="security-icon">⬡</div><h3>Dependencias</h3><p><b>pip-audit</b> contrasta paquetes con vulnerabilidades conocidas.</p></article><article><div class="security-icon">◆</div><h3>Secretos</h3><p><b>detect-secrets</b> evita incorporar credenciales nuevas al repositorio.</p></article></div>
+      <p class="policy"><b>Política:</b> una vulnerabilidad confirmada media/alta bloquea; los falsos positivos se documentan. Los reportes se guardan en formatos legibles y JSON cuando corresponde.</p>
+      <aside class="notes">Bandit y pip-audit no hacen lo mismo. Uno revisa nuestro código y el otro las bibliotecas externas. Detect-secrets cubre credenciales accidentales.</aside>
+    </section>
+
+    <section class="slide" data-title="Dependencias reproducibles">
+      <div class="eyebrow">Dependencias</div><h2>Versiones fijadas y actualizaciones controladas</h2>
+      <div class="split visual-right">
+        <div><ul class="check-list"><li><code>requirements-lock.txt</code> fija versiones exactas.</li><li><b>pip-audit</b> revisa vulnerabilidades conocidas.</li><li><b>Dependabot</b> propone actualizaciones mediante pull requests.</li><li>Cada propuesta vuelve a pasar los mismos controles.</li></ul></div>
+        <figure><img src="assets/07-dependabot.png" alt="Ejecuciones de Dependabot"><figcaption>Automatizar la propuesta no significa aprobarla automáticamente.</figcaption></figure>
+      </div>
+      <aside class="notes">Dependabot no modifica master por su cuenta. Abre una propuesta, el CI la prueba y recién después decidimos si integrarla.</aside>
+    </section>
+
+    <section class="slide" data-title="3. Diseño del pipeline">
+      <div class="eyebrow">3 · Diseño del pipeline</div><h2>Controles rápidos primero; mediciones costosas después</h2>
+      <div class="stage-list"><div><span>1</span><b>Integración</b><small>push / PR</small></div><div><span>2</span><b>Preparación</b><small>Python + dependencias fijadas</small></div><div><span>3</span><b>Calidad estática</b><small>Ruff · mypy · Radon</small></div><div><span>4</span><b>Pruebas</b><small>pytest · cobertura</small></div><div><span>5</span><b>Seguridad y docs</b><small>Bandit · audit · Sphinx</small></div><div><span>6</span><b>Eficiencia</b><small>benchmark · CPU · memoria</small></div><div><span>7</span><b>Resultado</b><small>estado + artefactos</small></div></div>
+      <p class="muted center">Los cinco trabajos independientes se ejecutan en paralelo para reducir el tiempo total.</p>
+      <aside class="notes">La organización sigue el orden propuesto por la profesora. En GitHub se ve agrupada en cinco trabajos porque varias herramientas relacionadas comparten entorno.</aside>
+    </section>
+
+    <section class="slide" data-title="Qué hace cada etapa">
+      <div class="eyebrow">Cinco trabajos del CI</div><h2>Cada etapa responde una pregunta diferente</h2>
+      <div class="phase-grid">
+        <article><span>01</span><h3>Calidad estática</h3><p>¿El código está bien escrito y es mantenible?</p><b>Ruff · mypy · Radon</b><small>Cero errores y complejidad dentro del límite.</small></article>
+        <article><span>02</span><h3>Pruebas y cobertura</h3><p>¿El sistema funciona y cuánto código probamos?</p><b>pytest · pytest-cov</b><small>15 pruebas aprobadas y cobertura mínima del 90 %.</small></article>
+        <article><span>03</span><h3>Seguridad</h3><p>¿Hay riesgos en código, paquetes o secretos?</p><b>Bandit · pip-audit · detect-secrets</b><small>Los hallazgos bloqueantes impiden integrar.</small></article>
+        <article><span>04</span><h3>Documentación</h3><p>¿El sitio se construye y sus enlaces funcionan?</p><b>Sphinx · linkcheck</b><small>Construcción sin advertencias obligatorias.</small></article>
+        <article><span>05</span><h3>Rendimiento y memoria</h3><p>¿El sistema sigue siendo eficiente?</p><b>Benchmark · cProfile · tracemalloc</b><small>Sin regresión significativa y máximo 25 MiB.</small></article>
+      </div>
+      <div class="phase-order"><b>Ejecución:</b> las primeras cuatro comienzan en paralelo; rendimiento espera que calidad y pruebas hayan aprobado.</div>
+      <aside class="notes">Calidad revisa cómo está escrito; pruebas comprueba que funcione; seguridad busca riesgos; documentación valida el sitio; rendimiento controla velocidad, CPU y memoria.</aside>
+    </section>
+
+    <section class="slide" data-title="Nuestras condiciones de éxito">
+      <div class="eyebrow">Criterios de aprobación</div><h2>Nuestras condiciones de éxito</h2>
+      <p class="success-intro">Cada etapa observa un riesgo distinto del proyecto y tiene una regla objetiva para decidir si el cambio puede avanzar.</p>
+      <div class="success-grid">
+        <article><h3>Calidad estática</h3><p>Examina el código sin ejecutarlo: errores, tipos y funciones difíciles de mantener.</p><ul><li><b>Ruff y mypy:</b> cero errores.</li><li><b>Radon:</b> máxima ≤ 20 y promedio ≤ 8.</li></ul><small>Resultado: máxima 18 · promedio 2,56</small></article>
+        <article><h3>Pruebas y cobertura</h3><p>Ejecuta casos esperados y mide qué porcentaje del código fue recorrido.</p><ul><li>Las 15 pruebas deben aprobar.</li><li>Cobertura ≥ 90 %.</li></ul><small>Resultado: 15/15 · cobertura 94,1 %</small></article>
+        <article><h3>Seguridad</h3><p>Busca patrones inseguros, paquetes vulnerables y credenciales accidentales.</p><ul><li>Sin hallazgos medios o altos.</li><li>Sin vulnerabilidades ni secretos nuevos.</li></ul><small>Bandit · pip-audit · detect-secrets</small></article>
+        <article><h3>Documentación</h3><p>Convierte los archivos RST en un sitio y comprueba que sus enlaces funcionen.</p><ul><li>Sphinx construye sin errores.</li><li>Enlaces válidos.</li></ul><small>Resultado: sitio y linkcheck aprobados</small></article>
+        <article><h3>Rendimiento y memoria</h3><p>Mide cuánto tarda, dónde consume CPU y cuál es su pico de memoria.</p><ul><li>Sin regresión superior al 25 %.</li><li>Mismas alertas y memoria ≤ 25 MiB.</li></ul><small>Resultado: memoria aproximada 8,35 MiB</small></article>
+      </div>
+      <div class="final-gate"><b>Condición final:</b> los cinco checks deben quedar verdes para integrar el cambio en <code>master</code>.</div>
+      <aside class="notes">No usamos una única condición para todo. Cada control tiene su propio criterio. El resultado final solamente es exitoso cuando los cinco trabajos obligatorios quedan verdes.</aside>
+    </section>
+
+    <section class="slide" data-title="3.1 Fallos y bloqueo">
+      <div class="eyebrow">3.1 · Qué ocurre si falla un control</div><h2>El error es información y también una barrera</h2>
+      <div class="split visual-right">
+        <div><p>Durante la implementación, <b>detect-secrets</b> detectó una diferencia en la línea temporal de la baseline y el trabajo de seguridad terminó con código 1.</p><ol class="steps small"><li><b>El CI rechazó el cambio</b><span>La marca roja identificó el trabajo exacto.</span></li><li><b>Analizamos el reporte</b><span>No era un secreto: era un campo de fecha generado.</span></li><li><b>Ajustamos la comparación</b><span>Ignoramos solo <code>generated_at</code>.</span></li><li><b>Reejecutamos</b><span>El control quedó verde sin desactivarlo.</span></li></ol></div>
+        <figure><img src="assets/02-fallo-seguridad.png" alt="Fallo del control de seguridad por diferencia de timestamp"><figcaption>Un fallo real y su corrección verificable.</figcaption></figure>
+      </div>
+      <aside class="notes">Este ejemplo demuestra que el pipeline no es decorativo. Falló, explicó la causa y obligó a corregir la configuración antes de continuar.</aside>
+    </section>
+
+    <section class="slide" data-title="Protección de master">
+      <div class="eyebrow">Aplicación de la política</div><h2><code>master</code> exige los cinco resultados verdes</h2>
+      <div class="split visual-right">
+        <div>
+          <h3>Checks obligatorios</h3>
+          <ul class="check-list compact-checks"><li>Calidad estática</li><li>Pruebas y cobertura</li><li>Seguridad</li><li>Documentación</li><li>Rendimiento y memoria</li></ul>
+          <h3>Otras reglas de la rama</h3>
+          <ul class="rule-list"><li>Los cambios ingresan mediante <b>pull request</b>; no se trabaja directamente sobre <code>master</code>.</li><li>La rama debe estar actualizada antes del merge.</li><li>Se bloquean los <b>force pushes</b>.</li><li>Se restringe la eliminación de la rama.</li></ul>
+        </div>
+        <figure><img src="assets/04-proteccion-rama.png" alt="Regla de protección con cinco status checks"><figcaption>La política técnica se convierte en una regla de GitHub.</figcaption></figure>
+      </div>
+      <aside class="notes">No alcanza con ejecutar controles: deben ser obligatorios. Además de exigir los cinco checks, la ruleset obliga a trabajar mediante pull request, evita force pushes, restringe la eliminación de master y exige probar el cambio sobre una rama actualizada.</aside>
+    </section>
+
+    <section class="slide" data-title="Paso a paso realizado">
+      <div class="eyebrow">Resumen de implementación</div><h2>Qué hicimos, en orden</h2>
+      <ol class="timeline"><li><span>01</span><p><b>Rama parcial3</b><small>Preservamos el estado anterior.</small></p></li><li><span>02</span><p><b>Herramientas y umbrales</b><small>CI, pruebas, calidad, seguridad y eficiencia.</small></p></li><li><span>03</span><p><b>Documentación Sphinx</b><small>Contenido funcional, técnico y operativo.</small></p></li><li><span>04</span><p><b>Validación local</b><small>Corregimos hasta aprobar los controles.</small></p></li><li><span>05</span><p><b>Push y pull request</b><small>GitHub Actions generó evidencia.</small></p></li><li><span>06</span><p><b>Protección de master</b><small>Cinco checks obligatorios.</small></p></li><li><span>07</span><p><b>Merge y publicación</b><small>Pages desplegó la documentación.</small></p></li></ol>
+      <aside class="notes">Este es el relato corto para la defensa: preservar, automatizar, documentar, validar, revisar, proteger e integrar.</aside>
+    </section>
+
+    <section class="slide" data-title="Resultado final">
+      <div class="eyebrow">Resultado</div><h2>El proyecto quedó verificable y mantenible</h2>
+      <div class="split visual-right">
+        <div><p class="big-copy">Cada cambio deja una respuesta objetiva: <em>aprobado o rechazado</em>, con evidencia.</p><ul class="check-list"><li>PR integrado únicamente con controles verdes.</li><li>Pipeline activo en <code>master</code>.</li><li>Documentación pública y actualizada.</li><li>Dependencias vigiladas por Dependabot.</li><li>Reportes y artefactos descargables.</li></ul><a class="cta" href="https://github.com/Alesso-Chiavarino/PE" target="_blank" rel="noreferrer">Ver repositorio ↗</a></div>
+        <figure><img src="assets/05-ci-pages-verde.png" alt="Controles y publicación aprobados"><figcaption>CI y publicación completados correctamente.</figcaption></figure>
+      </div>
+      <aside class="notes">La mejora principal es el proceso: ahora se puede demostrar la calidad del código, repetir los controles y mantener la documentación junto con cada versión.</aside>
+    </section>
+  </main>
+
+  <footer class="controls">
+    <button id="prevBtn" aria-label="Diapositiva anterior">←</button>
+    <div class="progress"><span id="progressBar"></span></div>
+    <span id="counter">1 / 19</span>
+    <button id="nextBtn" aria-label="Diapositiva siguiente">→</button>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
