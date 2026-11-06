@@ -184,10 +184,15 @@
     <section class="slide" data-title="Protección de master">
       <div class="eyebrow">Aplicación de la política</div><h2><code>master</code> exige los cinco resultados verdes</h2>
       <div class="split visual-right">
-        <div><ul class="check-list"><li>Calidad estática</li><li>Pruebas y cobertura</li><li>Seguridad</li><li>Documentación</li><li>Rendimiento y memoria</li></ul><p>Además, la rama debe estar actualizada antes de fusionar y se bloquean los <i>force pushes</i>.</p></div>
+        <div>
+          <h3>Checks obligatorios</h3>
+          <ul class="check-list compact-checks"><li>Calidad estática</li><li>Pruebas y cobertura</li><li>Seguridad</li><li>Documentación</li><li>Rendimiento y memoria</li></ul>
+          <h3>Otras reglas de la rama</h3>
+          <ul class="rule-list"><li>Los cambios ingresan mediante <b>pull request</b>; no se trabaja directamente sobre <code>master</code>.</li><li>La rama debe estar actualizada antes del merge.</li><li>Se bloquean los <b>force pushes</b>.</li><li>Se restringe la eliminación de la rama.</li></ul>
+        </div>
         <figure><img src="assets/04-proteccion-rama.png" alt="Regla de protección con cinco status checks"><figcaption>La política técnica se convierte en una regla de GitHub.</figcaption></figure>
       </div>
-      <aside class="notes">No alcanza con ejecutar controles: deben ser obligatorios. La regla evita integrar por accidente cuando alguno falla.</aside>
+      <aside class="notes">No alcanza con ejecutar controles: deben ser obligatorios. Además de exigir los cinco checks, la ruleset obliga a trabajar mediante pull request, evita force pushes, restringe la eliminación de master y exige probar el cambio sobre una rama actualizada.</aside>
     </section>
 
     <section class="slide" data-title="Paso a paso realizado">
