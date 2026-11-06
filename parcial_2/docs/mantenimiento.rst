@@ -6,7 +6,7 @@ Flujo de contribución
 
 Cada cambio se realiza en una rama y se integra mediante un pull request. GitHub
 Actions ejecuta automáticamente los controles ante cada push y cada pull request
-hacia ``main``. No debe integrarse código mientras exista un control bloqueante.
+hacia ``master``. No debe integrarse código mientras exista un control bloqueante.
 
 Preparación local
 -----------------
