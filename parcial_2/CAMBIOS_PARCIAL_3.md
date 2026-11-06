@@ -20,6 +20,7 @@ y bloqueante antes de integrar cambios.
 | Memoria | Medición informativa | Control reproducible con límite de 25 MiB |
 | Profiling | cProfile y SnakeViz locales | El CI genera y conserva los archivos `.prof` |
 | Documentación | Cuatro páginas Sphinx | Diez páginas con arquitectura, diseño, pruebas, seguridad y mantenimiento |
+| Publicación | Documentación solamente local | Sitio Sphinx publicado automáticamente con GitHub Pages |
 
 ## Pipeline
 

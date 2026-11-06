@@ -8,6 +8,14 @@ Cada cambio se realiza en una rama y se integra mediante un pull request. GitHub
 Actions ejecuta automáticamente los controles ante cada push y cada pull request
 hacia ``master``. No debe integrarse código mientras exista un control bloqueante.
 
+Publicación de la documentación
+-------------------------------
+
+El workflow ``pages.yml`` construye el sitio Sphinx y lo publica en GitHub Pages
+después de cada push aprobado a ``master``. También puede ejecutarse manualmente
+desde la pestaña Actions. La publicación requiere seleccionar ``GitHub Actions``
+como origen en ``Settings``, ``Pages``, ``Build and deployment``.
+
 Preparación local
 -----------------
 
